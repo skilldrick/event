@@ -1,0 +1,9 @@
+DEPENDENCIES
+============
+
+Install these on Windows in this order:
+
+1. Python 2.6: http://www.python.org/ftp/python/2.6.4/python-2.6.4.amd64.msi
+2. PyQt 4:     http://www.riverbankcomputing.co.uk/static/Downloads/PyQt4/PyQt-Py2.6-gpl-4.7-1.exe
+3. PIL:        http://effbot.org/downloads/PIL-1.1.7.win32-py2.6.exe
+
