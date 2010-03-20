@@ -3,6 +3,18 @@ import os.path
     
 
 class Filesystem:
+    forbiddenChars = [
+        #'\\',
+        #'/',
+        ':',
+        '*',
+        '?',
+        '"',
+        '<',
+        '>',
+        '|',
+        ]
+    
     def join(f):
         def new_f(self, dirname):
             dirname = self.joinPath(dirname)
@@ -15,8 +27,16 @@ class Filesystem:
 
     @join
     def makeDir(self, dirname):
+        if not self.checkValidDir(dirname):
+            raise IOError
         if not self.checkDirExists(dirname):
             os.makedirs(dirname)
+
+    def checkValidDir(self, dirname):
+        for char in self.forbiddenChars:
+            if char in dirname:
+                return False
+        return True
 
     def joinPath(self, dirname):
         if type(dirname) == list:
@@ -39,6 +59,7 @@ class FilesystemTests(unittest.TestCase):
         self.root = 'testdir'
         self.longDirname = ['testdir', 'newdir']
         self.filesystem = Filesystem()
+        self.filesystem.makeDir(self.root)
         
     def testCheckDirExists(self):
         self.assertTrue(self.filesystem.checkDirExists(self.root))
@@ -63,20 +84,48 @@ class FilesystemTests(unittest.TestCase):
 
     def testListDirs(self):
         newdirs = [
+            'testdir',
             ['testdir', 'dir1'],
-            ['testdir', 'dir2'],
             ['testdir', 'dir1', 'sub1'],
             ['testdir', 'dir1', 'sub2'],
+            ['testdir', 'dir2'],
             ['testdir', 'dir2', 'sub1'],
             ['testdir', 'dir2', 'sub2'],
             ]
         for newdir in newdirs:
             self.filesystem.makeDir(newdir)
         dirlist = self.filesystem.listDirs(self.root)
-        for item in dirlist:
-            print item
+        for listitem, diritem in zip(dirlist, newdirs):
+            self.assertEqual(listitem, self.filesystem.joinPath(diritem))
         for newdir in reversed(newdirs):
             self.filesystem.removeDir(newdir)
+
+    def testValidDirs(self):
+        validNames = [
+            'hello',
+            'dir1',
+            'monkey%',
+            ]
+        for name in validNames:
+            self.assertTrue(self.filesystem.checkValidDir(name))
+            
+    def testInvalidDir(self):
+        invalidNames = [
+            'dave<dave',
+            'fish"1',
+            'this*',
+            'pipe|pipe',
+            ]
+        for name in invalidNames:
+            self.assertFalse(self.filesystem.checkValidDir(name))
+
+    def testCreateInvalidDir(self):
+        invalidDir = ['testdir', 'some>thing']
+        try:
+            self.filesystem.makeDir(invalidDir)
+            self.fail('makeDir should have raised an IOError')
+       except IOError:
+            pass
 
 
 if __name__ == '__main__':
