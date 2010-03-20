@@ -1,28 +1,28 @@
-    import sys
-    from PyQt4 import QtCore, QtGui
-    import Image
-    import ImageQt
+import sys
+from PyQt4 import QtCore, QtGui
+import Image
+import ImageQt
 
 
-    class MyWidget(QtGui.QWidget):
-        def __init__(self, parent=None):
-            QtGui.QWidget.__init__(self, parent)
+class MyWidget(QtGui.QWidget):
+    def __init__(self, parent=None):
+        QtGui.QWidget.__init__(self, parent)
 
-            self.setGeometry(300, 300, 400, 293)
-            self.setWindowTitle('My Widget!')
-
-
-            PilImage = Image.open('kitten.jpg')
-            QtImage1 = ImageQt.ImageQt(PilImage)
-            QtImage2 = QtGui.QImage(QtImage1)
-            pixmap = QtGui.QPixmap.fromImage(QtImage2)
-            label = QtGui.QLabel('', self)
-            label.setPixmap(pixmap)
+        self.setGeometry(300, 300, 400, 293)
+        self.setWindowTitle('My Widget!')
 
 
-    if __name__ == '__main__':
-        app = QtGui.QApplication(sys.argv)
-        myWidget = MyWidget()
-        myWidget.show()
+        PilImage = Image.open('kitten.jpg')
+        QtImage1 = ImageQt.ImageQt(PilImage)
+        QtImage2 = QtGui.QImage(QtImage1)
+        pixmap = QtGui.QPixmap.fromImage(QtImage2)
+        label = QtGui.QLabel('', self)
+        label.setPixmap(pixmap)
 
-        sys.exit(app.exec_())
+
+if __name__ == '__main__':
+    app = QtGui.QApplication(sys.argv)
+    myWidget = MyWidget()
+    myWidget.show()
+
+    sys.exit(app.exec_())
