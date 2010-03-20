@@ -3,17 +3,7 @@ import os.path
     
 
 class Filesystem:
-    forbiddenChars = [
-        #'\\',
-        #'/',
-        ':',
-        '*',
-        '?',
-        '"',
-        '<',
-        '>',
-        '|',
-        ]
+    forbiddenChars = [':', '*', '?', '"', '<', '>', '|']
     
     def join(f):
         def new_f(self, dirname):
@@ -124,7 +114,7 @@ class FilesystemTests(unittest.TestCase):
         try:
             self.filesystem.makeDir(invalidDir)
             self.fail('makeDir should have raised an IOError')
-       except IOError:
+        except IOError:
             pass
 
 
