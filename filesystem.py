@@ -1,6 +1,5 @@
 import unittest
 import os.path
-
     
 
 class Filesystem:
@@ -27,16 +26,22 @@ class Filesystem:
     @join
     def removeDir(self, dirname):
         os.rmdir(dirname)
-        
+
+    def listDirs(self, root):
+        for x in os.walk(root):
+            yield x[0]
+
+    
 
 
 class FilesystemTests(unittest.TestCase):
     def setUp(self):
+        self.root = 'testdir'
         self.longDirname = ['testdir', 'newdir']
         self.filesystem = Filesystem()
         
     def testCheckDirExists(self):
-        self.assertTrue(self.filesystem.checkDirExists('testdir'))
+        self.assertTrue(self.filesystem.checkDirExists(self.root))
 
     def testCheckDirDoesntExist(self):
         self.assertFalse(self.filesystem.checkDirExists('fakedir'))
@@ -47,9 +52,8 @@ class FilesystemTests(unittest.TestCase):
         self.assertTrue(success)
 
     def testMakeExistingDir(self):
-        dirname = 'testdir'
-        self.filesystem.makeDir(dirname)
-        success = self.filesystem.checkDirExists(dirname)
+        self.filesystem.makeDir(self.root)
+        success = self.filesystem.checkDirExists(self.root)
         self.assertTrue(success)
 
     def testRemoveDir(self):
@@ -57,9 +61,24 @@ class FilesystemTests(unittest.TestCase):
         self.filesystem.removeDir(self.longDirname)
         self.assertFalse(self.filesystem.checkDirExists(self.longDirname))
 
+    def testListDirs(self):
+        newdirs = [
+            ['testdir', 'dir1'],
+            ['testdir', 'dir2'],
+            ['testdir', 'dir1', 'sub1'],
+            ['testdir', 'dir1', 'sub2'],
+            ['testdir', 'dir2', 'sub1'],
+            ['testdir', 'dir2', 'sub2'],
+            ]
+        for newdir in newdirs:
+            self.filesystem.makeDir(newdir)
+        dirlist = self.filesystem.listDirs(self.root)
+        for item in dirlist:
+            print item
+        for newdir in reversed(newdirs):
+            self.filesystem.removeDir(newdir)
+
 
 if __name__ == '__main__':
     unittest.main()
 
-                       
-        
