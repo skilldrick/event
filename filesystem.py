@@ -11,6 +11,11 @@ class Filesystem:
             return f(self, dirname)
         return new_f
     
+    def joinPath(self, dirname):
+        if type(dirname) == list:
+            dirname = os.path.join(*dirname)
+        return dirname
+
     @join
     def checkDirExists(self, dirname):
         return os.path.exists(dirname)
@@ -28,11 +33,6 @@ class Filesystem:
                 return False
         return True
 
-    def joinPath(self, dirname):
-        if type(dirname) == list:
-            dirname = os.path.join(*dirname)
-        return dirname
-
     @join
     def removeDir(self, dirname):
         os.rmdir(dirname)
@@ -41,7 +41,11 @@ class Filesystem:
         for x in os.walk(root):
             yield x[0]
 
-    
+    @join
+    def listFiles(self, root):
+        filenames = os.listdir(root)
+        for filename in filenames:
+            yield filename
 
 
 class FilesystemTests(unittest.TestCase):
@@ -110,12 +114,25 @@ class FilesystemTests(unittest.TestCase):
             self.assertFalse(self.filesystem.checkValidDir(name))
 
     def testCreateInvalidDir(self):
-        invalidDir = ['testdir', 'some>thing']
+        invalidDir = [self.root, 'some>thing']
         try:
             self.filesystem.makeDir(invalidDir)
             self.fail('makeDir should have raised an IOError')
         except IOError:
             pass
+
+    def testListFiles(self):
+        filenames = ['test1', 'test2', 'test3']
+        filenamepaths = [os.path.join(self.root, filename)
+                         for filename in filenames]
+        for filenamepath in filenamepaths:
+            f = open(filenamepath, 'w')
+            f.close()
+        filelist = self.filesystem.listFiles(self.root)
+        for file1, file2 in zip(filenames, filelist):
+            self.assertEqual(file1, file2)
+        for filenamepath in filenamepaths:
+            os.remove(filenamepath)
 
 
 if __name__ == '__main__':
