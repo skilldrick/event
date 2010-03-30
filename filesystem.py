@@ -1,14 +1,22 @@
 import unittest
 import os.path
+import shutil
     
 
 class Filesystem:
     forbiddenChars = [':', '*', '?', '"', '<', '>', '|']
     
     def join(f):
-        def new_f(self, dirname):
-            dirname = self.joinPath(dirname)
-            return f(self, dirname)
+        def new_f(self, pathname):
+            pathname = self.joinPath(pathname)
+            return f(self, pathname)
+        return new_f
+
+    def join2(f):
+        def new_f(self, pathname1, pathname2):
+            pathname1 = self.joinPath(pathname1)
+            pathname2 = self.joinPath(pathname2)
+            return f(self, pathname1, pathname2)
         return new_f
     
     def joinPath(self, dirname):
@@ -19,6 +27,10 @@ class Filesystem:
     @join
     def checkDirExists(self, dirname):
         return os.path.exists(dirname)
+
+    @join
+    def checkFileExists(self, filename):
+        return os.path.exists(filename)
 
     @join
     def makeDir(self, dirname):
@@ -47,6 +59,15 @@ class Filesystem:
         for filename in filenames:
             yield filename
 
+    @join2
+    def copy(self, source, destination):
+        shutil.copy2(source, destination)
+
+    @join
+    def removeFile(self, filename):
+        os.remove(filename)
+    
+        
 
 class FilesystemTests(unittest.TestCase):
     def setUp(self):
@@ -133,6 +154,18 @@ class FilesystemTests(unittest.TestCase):
             self.assertEqual(file1, file2)
         for filenamepath in filenamepaths:
             os.remove(filenamepath)
+
+    def testFileExists(self):
+        filename = ['imagesdir', 'kitten.jpg']
+        self.assertTrue(self.filesystem.checkFileExists(filename))
+
+    def testCopyFile(self):
+        source = ['imagesdir', 'kitten.jpg']
+        destination = ['testdir', 'testkitten.jpg']
+        self.filesystem.copy(source, destination)
+        self.assertTrue(self.filesystem.checkFileExists(destination))
+        self.filesystem.removeFile(destination)
+
 
 
 if __name__ == '__main__':
