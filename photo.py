@@ -12,11 +12,18 @@ class Photo:
         return self.image.format
 
     def isLandscape(self):
+        rotated = self.isRotated()
+        width, height = self.image.size
+        if rotated:
+            return height > width
+        else:
+            return width > height
+
+    def isRotated(self):
         exif = self.getExif()
         if exif['Orientation'] == 6:
-            return False
-        width, height = self.image.size
-        return width > height
+            return True
+        return False
 
     def getExif(self):
         info = self.image._getexif()
@@ -36,10 +43,12 @@ class PhotoTests(unittest.TestCase):
         self.filename = 'kitten.jpg'
         self.filename2 = 'kitten-portrait.jpg'
         self.filename3 = 'DSC_0015.JPG'
+        self.filename4 = 'DSC_0030.JPG'
         self.filetype = 'JPEG'
         self.photo = Photo(self.root, self.filename)
         self.photo2 = Photo(self.root, self.filename2)
         self.photo3 = Photo(self.root, self.filename3)
+        self.photo4 = Photo(self.root, self.filename4)
 
     def testKittenIsJPG(self):
         self.assertEqual(self.filetype, self.photo.type())
@@ -52,6 +61,9 @@ class PhotoTests(unittest.TestCase):
 
     def testHarmonyIsPortrait(self):
         self.assertFalse(self.photo3.isLandscape())
+
+    def testLandscapeIsLandscape(self):
+        self.assertTrue(self.photo4.isLandscape())
 
 
 if __name__ == '__main__':
