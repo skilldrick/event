@@ -13,11 +13,18 @@ class MyWidget(QtGui.QWidget):
 
 
         PilImage = Image.open('kitten.jpg')
-        QtImage1 = ImageQt.ImageQt(PilImage)
+        pixmap = self.convertImage(PilImage)
+        pixmap2 = self.convertImage(Image.open('imagesdir/DSC_0015.JPG'))
+        label = QtGui.QLabel('', self)
+        label.setPixmap(pixmap2)
+
+    def convertImage(self, image):
+        """Takes a PIL image and returns a QtPixmap"""
+        QtImage1 = ImageQt.ImageQt(image)
         QtImage2 = QtGui.QImage(QtImage1)
         pixmap = QtGui.QPixmap.fromImage(QtImage2)
-        label = QtGui.QLabel('', self)
-        label.setPixmap(pixmap)
+        return pixmap
+
 
 
 if __name__ == '__main__':
