@@ -10,9 +10,9 @@ from filesystem import Filesystem
 class Stacked(QtGui.QStackedWidget):
     def __init__(self, parent=None):
         QtGui.QStackedWidget.__init__(self, parent)
-        self.widget1 = MyWidget('kitten.jpg')
-        self.widget2 = MyWidget('imagesdir/kitten-portrait.jpg')
-        self.widget3 = EventsPage()
+        self.widget1 = EventsPage()
+        self.widget2 = MyWidget('imagesdir/kitten.jpg')
+        self.widget3 = MyWidget('imagesdir/kitten-portrait.jpg')
         self.addWidget(self.widget1)
         self.addWidget(self.widget2)
         self.addWidget(self.widget3)
@@ -29,11 +29,31 @@ class EventsPage(QtGui.QWidget):
         QtGui.QWidget.__init__(self, parent)
         self.config = Config()
         self.filesystem = Filesystem()
+        
         eventsDir = self.config.eventsDir()
         dirs = self.filesystem.listDirs(eventsDir)
-        for dir in dirs:
-            print dir #populate the event dir
-        label = QtGui.QLabel(eventsDir, self)
+        numberOfDirs = len(list(dirs))
+        if numberOfDirs == 0:
+            label = QtGui.QLabel("No events in '{eventsDir}'".format(eventsDir=eventsDir))
+        newEventButton = QtGui.QPushButton('New Event')
+        newEventButton.clicked.connect(self.getEvent)
+        vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(label)
+        vbox.addWidget(newEventButton)
+        self.setLayout(vbox)
+
+    def getEvent(self):
+        text = QtGui.QInputDialog.getText(self, 'New event',
+                                          'Event name:')
+        self.addEvent(text)
+
+    def addEvent(self, event):
+        try:
+            self.filesystem.makeDir([self.config.eventsDir(), event])
+        except IOError:
+            print 'Couldn\'t create {event}'.format(event=event)
+        
+        
 
 
 class MasterWidget(QtGui.QWidget):
