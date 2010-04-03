@@ -5,6 +5,11 @@ import ImageQt
 
 from config import Config
 from filesystem import Filesystem
+from featurebroker import *
+
+
+def QStringToPythonString(QString):
+    return str(QString[0].toAscii())
 
 
 class Stacked(QtGui.QStackedWidget):
@@ -25,16 +30,19 @@ class Stacked(QtGui.QStackedWidget):
 
 
 class EventsPage(QtGui.QWidget):
+    config = RequiredFeature('Config', HasMethods('eventsDir'))
+    filesystem = RequiredFeature('Filesystem')
+    
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        self.config = Config()
-        self.filesystem = Filesystem()
-        
         eventsDir = self.config.eventsDir()
         dirs = self.filesystem.listDirs(eventsDir)
-        numberOfDirs = len(list(dirs))
+        numberOfDirs = len(dirs)
         if numberOfDirs == 0:
             label = QtGui.QLabel("No events in '{eventsDir}'".format(eventsDir=eventsDir))
+        else:
+            labelText = ', '.join(dirs)
+            label = QtGui.QLabel(labelText)
         newEventButton = QtGui.QPushButton('New Event')
         newEventButton.clicked.connect(self.getEvent)
         vbox = QtGui.QVBoxLayout()
@@ -45,7 +53,7 @@ class EventsPage(QtGui.QWidget):
     def getEvent(self):
         text = QtGui.QInputDialog.getText(self, 'New event',
                                           'Event name:')
-        self.addEvent(text)
+        self.addEvent(QStringToPythonString(text))
 
     def addEvent(self, event):
         try:
@@ -101,6 +109,8 @@ class MyWidget(QtGui.QWidget):
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
+    features.Provide('Config', Config)
+    features.Provide('Filesystem', Filesystem)
     masterWidget = MasterWidget()
     masterWidget.show()
     sys.exit(app.exec_())

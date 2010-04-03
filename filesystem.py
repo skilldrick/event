@@ -50,8 +50,10 @@ class Filesystem:
         os.rmdir(dirname)
 
     def listDirs(self, root):
+        ret = []
         for x in os.walk(root):
-            yield x[0]
+            ret.append(x[0])
+        return ret
 
     @join
     def listFiles(self, root):
@@ -106,6 +108,7 @@ class FilesystemTests(unittest.TestCase):
             ['testdir', 'dir2'],
             ['testdir', 'dir2', 'sub1'],
             ['testdir', 'dir2', 'sub2'],
+            ['testdir', 'dir2', 'x, a dir with spaces'],
             ]
         for newdir in newdirs:
             self.filesystem.makeDir(newdir)
