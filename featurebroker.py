@@ -10,7 +10,7 @@ class FeatureBroker:
         self.allowReplace = allowReplace
     def Provide(self, feature, provider, *args, **kwargs):
         if not self.allowReplace:
-            assert not self.providers.has_key(feature), "Duplicate feature: %r" % feature
+            assert not self.providers.has_key(feature), "Duplicate feature: {0!r}".format(feature)
         if callable(provider):
             def call(): return provider(*args, **kwargs)
         else:
