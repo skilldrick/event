@@ -8,7 +8,7 @@ class FeatureBroker:
     def __init__(self, allowReplace=False):
         self.providers = {}
         self.allowReplace = allowReplace
-    def Provide(self, feature, provider, *args, **kwargs):
+    def provide(self, feature, provider, *args, **kwargs):
         if not self.allowReplace:
             assert not self.providers.has_key(feature), "Duplicate feature: {0!r}".format(feature)
         if callable(provider):
@@ -36,20 +36,20 @@ features = FeatureBroker()
 # Some basic assertions to test the suitability of injected features
 #
 
-def NoAssertion(obj): return True
+def noAssertion(obj): return True
 
-def IsInstanceOf(*classes):
+def isInstanceOf(*classes):
     def test(obj): return isinstance(obj, classes)
     return test
 
-def HasAttributes(*attributes):
+def hasAttributes(*attributes):
     def test(obj):
         for each in attributes:
             if not hasattr(obj, each): return False
         return True
     return test
 
-def HasMethods(*methods):
+def hasMethods(*methods):
     def test(obj):
         for each in methods:
             try:
@@ -65,7 +65,7 @@ def HasMethods(*methods):
 #
 
 class RequiredFeature(object):
-    def __init__(self, feature, assertion=NoAssertion):
+    def __init__(self, feature, assertion=noAssertion):
         self.feature = feature
         self.assertion = assertion
     def __get__(self, obj, T):

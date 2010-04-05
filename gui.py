@@ -7,6 +7,7 @@ import unittest
 
 from config import Config
 from filesystem import Filesystem
+from eventlist import EventList, AddEventError
 from featurebroker import *
 
 
@@ -32,18 +33,16 @@ class Stacked(QtGui.QStackedWidget):
 
 
 class EventsPage(QtGui.QWidget):
-    config = RequiredFeature('Config', HasMethods('eventsDir'))
+    config = RequiredFeature('Config', hasMethods('eventsDir'))
     filesystem = RequiredFeature('Filesystem')
+    eventList = RequiredFeature('EventList')
     
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        eventsDir = self.config.eventsDir()
-        dirs = self.filesystem.listDirs(eventsDir)
-        numberOfDirs = len(dirs)
-        if numberOfDirs == 0:
+        if self.eventList.noEvents:
             label = QtGui.QLabel("No events in '{eventsDir}'".format(eventsDir=eventsDir))
         else:
-            labelText = ', '.join(dirs)
+            labelText = ', '.join(self.eventList.events)
             label = QtGui.QLabel(labelText)
         newEventButton = QtGui.QPushButton('New Event')
         newEventButton.clicked.connect(self.getEvent)
@@ -59,8 +58,8 @@ class EventsPage(QtGui.QWidget):
 
     def addEvent(self, event):
         try:
-            self.filesystem.makeDir([self.config.eventsDir(), event])
-        except IOError:
+            self.eventList.addEvent(event)
+        except AddEventError:
             print 'Couldn\'t create {event}'.format(event=event)
         
         
@@ -110,8 +109,9 @@ class MyWidget(QtGui.QWidget):
 
 def main():
     app = QtGui.QApplication(sys.argv)
-    features.Provide('Config', Config)
-    features.Provide('Filesystem', Filesystem)
+    features.provide('Config', Config)
+    features.provide('Filesystem', Filesystem)
+    features.provide('EventList', EventList)
     masterWidget = MasterWidget()
     masterWidget.show()
     sys.exit(app.exec_())

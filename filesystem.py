@@ -170,7 +170,6 @@ class FilesystemTests(unittest.TestCase):
         self.filesystem.removeFile(destination)
 
 
-
 if __name__ == '__main__':
     unittest.main()
 
