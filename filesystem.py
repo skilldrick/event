@@ -55,6 +55,10 @@ class Filesystem:
             ret.append(x[0])
         return ret
 
+    def listToplevelDirs(self, parent):
+        root, dirs, files = os.walk(parent).next()
+        return dirs
+
     @join
     def listFiles(self, root):
         filenames = os.listdir(root)
@@ -110,11 +114,16 @@ class FilesystemTests(unittest.TestCase):
             ['testdir', 'dir2', 'sub2'],
             ['testdir', 'dir2', 'x, a dir with spaces'],
             ]
+        testToplevelDirs = ['dir1', 'dir2']
         for newdir in newdirs:
             self.filesystem.makeDir(newdir)
         dirlist = self.filesystem.listDirs(self.root)
         for listitem, diritem in zip(dirlist, newdirs):
             self.assertEqual(listitem, self.filesystem.joinPath(diritem))
+        toplevelDirs = self.filesystem.listToplevelDirs(self.root)
+        for toplevelDir, testToplevelDir in zip(toplevelDirs,
+                                                testToplevelDirs):
+            self.assertEqual(toplevelDir, testToplevelDir)
         for newdir in reversed(newdirs):
             self.filesystem.removeDir(newdir)
 

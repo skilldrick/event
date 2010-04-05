@@ -5,34 +5,28 @@ from config import Config
 from filesystem import Filesystem
 
 
+
 class AddEventError(IOError):
     pass
 
 
 class EventList:
-    """
-    This class will contain event handling methods currently handled
-    by gui and filesystem
-    """
-
     filesystem = RequiredFeature('Filesystem')
     config = RequiredFeature('Config')
     events = []
     
     def __init__(self):
         self.eventsDir = self.config.eventsDir()
-        dirs = self.filesystem.listDirs(self.eventsDir)
-        numberOfDirs = len(dirs)
-        if numberOfDirs == 0:
-            self.noEvents = True
-        else:
-            self.noEvents = False
         self.loadEvents()
 
     def loadEvents(self):
-        dirs = self.filesystem.listDirs(self.eventsDir)
+        dirs = self.filesystem.listToplevelDirs(self.eventsDir)
+        self.numberOfDirs = len(dirs)
         for directory in dirs:
             self.events.append(directory)
+
+    def getEvents(self):
+        return self.events
 
     def addEvent(self, event):
         try:
@@ -55,9 +49,6 @@ class MockFilesystem (Filesystem):
 class EventListTests(unittest.TestCase):
     def setUp(self):
         self.eventList = EventList()
-
-    def testNoEvents(self):
-        self.assertFalse(self.eventList.noEvents)
 
     def testAddEvent(self):
         self.eventList.addEvent('bob')

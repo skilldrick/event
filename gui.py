@@ -7,6 +7,7 @@ import unittest
 
 from config import Config
 from eventlist import EventList, AddEventError
+from filesystem import Filesystem
 from featurebroker import *
 
 
@@ -37,18 +38,29 @@ class EventsPage(QtGui.QWidget):
     
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        if self.eventList.noEvents:
+        eventsDir = self.config.eventsDir()
+        if self.eventList.numberOfDirs == 0:
             label = QtGui.QLabel("No events in '{eventsDir}'".format(eventsDir=eventsDir))
         else:
-            labelText = ', '.join(self.eventList.events)
-            label = QtGui.QLabel(labelText)
+            label = QtGui.QLabel("{number} events in '{eventsDir}'".format(number=self.eventList.numberOfDirs, eventsDir=eventsDir))
+            self.makeList()
+            
         newEventButton = QtGui.QPushButton('New Event')
         newEventButton.clicked.connect(self.getEvent)
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(label)
+        vbox.addWidget(self.listWidget)
         vbox.addWidget(newEventButton)
+        
         self.setLayout(vbox)
 
+    def makeList(self):
+        self.listWidget = QtGui.QListWidget()
+        for i, event in enumerate(self.eventList.getEvents()):
+            item = QtGui.QListWidgetItem()
+            item.setText(event)
+            self.listWidget.insertItem(i, item)
+        
     def getEvent(self):
         text = QtGui.QInputDialog.getText(self, 'New event',
                                           'Event name:')
@@ -59,8 +71,6 @@ class EventsPage(QtGui.QWidget):
             self.eventList.addEvent(event)
         except AddEventError:
             print 'Couldn\'t create {event}'.format(event=event)
-        
-        
 
 
 class MasterWidget(QtGui.QWidget):
@@ -109,6 +119,7 @@ def main():
     app = QtGui.QApplication(sys.argv)
     features.provide('Config', Config)
     features.provide('EventList', EventList)
+    features.provide('Filesystem', Filesystem)
     masterWidget = MasterWidget()
     masterWidget.show()
     sys.exit(app.exec_())
