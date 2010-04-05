@@ -170,6 +170,11 @@ class FilesystemTests(unittest.TestCase):
         self.filesystem.removeFile(destination)
 
 
+def suite():
+    testSuite = unittest.makeSuite(FilesystemTests)
+    return testSuite
+        
+
 if __name__ == '__main__':
-    unittest.main()
+    unittest.TextTestRunner().run(suite())
 

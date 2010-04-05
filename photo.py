@@ -66,5 +66,10 @@ class PhotoTests(unittest.TestCase):
         self.assertTrue(self.photo4.isLandscape())
 
 
+def suite():
+    testSuite = unittest.makeSuite(PhotoTests)
+    return testSuite
+
+
 if __name__ == '__main__':
-    unittest.main()
+    unittest.TextTestRunner().run(suite())

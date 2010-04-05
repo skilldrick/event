@@ -61,12 +61,17 @@ class EventListTests(unittest.TestCase):
 
     def testAddEvent(self):
         self.eventList.addEvent('bob')
-        
 
-def main():
+        
+def suite():
     features.provide('Filesystem', MockFilesystem)
     features.provide('Config', Config)
-    unittest.main()
+    testSuite = unittest.makeSuite(EventListTests)
+    return testSuite
+
+    
+def main():
+    unittest.TextTestRunner().run(suite())
 
 if __name__ == '__main__':
     main()

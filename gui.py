@@ -6,7 +6,6 @@ import optparse
 import unittest
 
 from config import Config
-from filesystem import Filesystem
 from eventlist import EventList, AddEventError
 from featurebroker import *
 
@@ -34,7 +33,6 @@ class Stacked(QtGui.QStackedWidget):
 
 class EventsPage(QtGui.QWidget):
     config = RequiredFeature('Config', hasMethods('eventsDir'))
-    filesystem = RequiredFeature('Filesystem')
     eventList = RequiredFeature('EventList')
     
     def __init__(self, parent=None):
@@ -110,7 +108,6 @@ class MyWidget(QtGui.QWidget):
 def main():
     app = QtGui.QApplication(sys.argv)
     features.provide('Config', Config)
-    features.provide('Filesystem', Filesystem)
     features.provide('EventList', EventList)
     masterWidget = MasterWidget()
     masterWidget.show()
