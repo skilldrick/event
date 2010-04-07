@@ -35,31 +35,44 @@ class Stacked(QtGui.QStackedWidget):
 class EventsPage(QtGui.QWidget):
     config = RequiredFeature('Config', hasMethods('eventsDir'))
     eventList = RequiredFeature('EventList')
-    
+
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        eventsDir = self.config.eventsDir()
+        self.listWidget = QtGui.QListWidget()
         if self.eventList.numberOfDirs == 0:
-            label = QtGui.QLabel("No events in '{eventsDir}'".format(eventsDir=eventsDir))
+            self.layoutWithoutEvents()
         else:
-            label = QtGui.QLabel("{number} events in '{eventsDir}'".format(number=self.eventList.numberOfDirs, eventsDir=eventsDir))
-            self.makeList()
-            
+            self.layoutWithEvents()
+        
+    def layoutWithEvents(self):
+        label = QtGui.QLabel("{number} events in '{eventsDir}'".format(number=self.eventList.numberOfDirs,
+                                                                           eventsDir=self.config.eventsDir()))
+        self.makeList()
         newEventButton = QtGui.QPushButton('New Event')
         newEventButton.clicked.connect(self.getEvent)
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(label)
         vbox.addWidget(self.listWidget)
         vbox.addWidget(newEventButton)
-        
         self.setLayout(vbox)
 
+    def layoutWithoutEvents(self):
+        label = QtGui.QLabel("No events in '{eventsDir}'".format(eventsDir=self.config.eventsDir()))
+        newEventButton = QtGui.QPushButton('New Event')
+        vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(label)
+        vbox.addWidget(newEventButton)
+        self.setLayout(vbox)
+
+
     def makeList(self):
-        self.listWidget = QtGui.QListWidget()
+        self.listWidget.clear()
+        print 'count:', self.listWidget.count()
         for i, event in enumerate(self.eventList.getEvents()):
             item = QtGui.QListWidgetItem()
             item.setText(event)
             self.listWidget.insertItem(i, item)
+        print 'count:', self.listWidget.count()
         
     def getEvent(self):
         text = QtGui.QInputDialog.getText(self, 'New event',
@@ -69,8 +82,16 @@ class EventsPage(QtGui.QWidget):
     def addEvent(self, event):
         try:
             self.eventList.addEvent(event)
+            self.makeList()
+            self.repaint()
         except AddEventError:
             print 'Couldn\'t create {event}'.format(event=event)
+
+    def removeEvent(self, event):
+        """What happens if the event has images in? Probably show error message"""
+
+    def refreshEvents(self):
+        """Need to hook up a pushbutton to this"""
 
 
 class MasterWidget(QtGui.QWidget):

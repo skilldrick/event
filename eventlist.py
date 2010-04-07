@@ -13,19 +13,21 @@ class AddEventError(IOError):
 class EventList:
     filesystem = RequiredFeature('Filesystem')
     config = RequiredFeature('Config')
-    events = []
     
     def __init__(self):
         self.eventsDir = self.config.eventsDir()
         self.loadEvents()
 
     def loadEvents(self):
+        self.events = []
         dirs = self.filesystem.listToplevelDirs(self.eventsDir)
         self.numberOfDirs = len(dirs)
         for directory in dirs:
             self.events.append(directory)
+        self.events.sort()
 
     def getEvents(self):
+        self.loadEvents()
         return self.events
 
     def addEvent(self, event):

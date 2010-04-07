@@ -56,7 +56,10 @@ class Filesystem:
         return ret
 
     def listToplevelDirs(self, parent):
-        root, dirs, files = os.walk(parent).next()
+        try:
+            root, dirs, files = os.walk(parent).next()
+        except StopIteration:
+            root, dirs, files = [], [], []
         return dirs
 
     @join
@@ -126,6 +129,9 @@ class FilesystemTests(unittest.TestCase):
             self.assertEqual(toplevelDir, testToplevelDir)
         for newdir in reversed(newdirs):
             self.filesystem.removeDir(newdir)
+
+    def testTopLevelDirsOnNonExistentDir(self):
+        self.filesystem.listToplevelDirs('nonexistentdir')
 
     def testValidDirs(self):
         validNames = [
