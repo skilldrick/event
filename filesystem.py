@@ -4,7 +4,7 @@ import shutil
     
 
 class Filesystem:
-    forbiddenChars = [':', '*', '?', '"', '<', '>', '|']
+    forbiddenChars = [':', '*', '?', '"', '<', '>', '|', '\\']
     
     def join(f):
         def new_f(self, pathname):

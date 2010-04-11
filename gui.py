@@ -39,6 +39,7 @@ class EventsPage(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.setupLayout()
+        self.eventErrorDialog = QtGui.QErrorMessage(self)
         
     def setupLayout(self):
         numberOfEvents = self.eventList.numberOfEvents()
@@ -98,7 +99,7 @@ class EventsPage(QtGui.QWidget):
             self.makeList()
             self.repaint()
         except EventError:
-            print 'Couldn\'t create {event}'.format(event=event)
+            self.eventErrorDialog.showMessage('Couldn\'t create {event}'.format(event=event))
 
     def removeEvent(self):
         text = self.listWidget.currentItem().text()
@@ -108,7 +109,7 @@ class EventsPage(QtGui.QWidget):
             self.makeList()
             self.repaint()
         except EventError:
-            print 'Couldn\'t remove {event}: not empty or directory does not exist'.format(event=event)
+            self.eventErrorDialog.showMessage('Couldn\'t remove {event}: not empty or directory does not exist'.format(event=event))
 
     def refreshEvents(self):
         self.makeList()
