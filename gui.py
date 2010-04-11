@@ -38,34 +38,43 @@ class EventsPage(QtGui.QWidget):
 
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        self.listWidget = QtGui.QListWidget()
         self.setupLayout()
         
     def setupLayout(self):
         numberOfEvents = self.eventList.numberOfEvents()
-        if numberOfEvents > 0:
-            label = QtGui.QLabel("{number} events in '{eventsDir}'".format(number=numberOfEvents,
-                                                                           eventsDir=self.config.eventsDir()))
-            self.makeList()
-        else:
-            label = QtGui.QLabel("No events in '{eventsDir}'".format(eventsDir=self.config.eventsDir()))
+        self.eventsCountLabel = QtGui.QLabel()
+        self.listWidget = QtGui.QListWidget()
+        self.makeList()
+        
         newEventButton = QtGui.QPushButton('New Event')
         newEventButton.clicked.connect(self.getEvent)
         refreshButton = QtGui.QPushButton('Refresh')
         refreshButton.clicked.connect(self.refreshEvents)
-        removeEventButton = QtGui.QPushButton('Remove Event')
-        removeEventButton.clicked.connect(self.removeEvent)
+        self.removeEventButton = QtGui.QPushButton('Remove Event')
+        self.removeEventButton.clicked.connect(self.removeEvent)
+        self.listWidget.currentRowChanged.connect(self.rowChanged)
         
         vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(label)
-        if numberOfEvents > 0:
-            vbox.addWidget(self.listWidget)
+        vbox.addWidget(self.eventsCountLabel)
+        vbox.addWidget(self.listWidget)
         hbox = QtGui.QHBoxLayout()
         hbox.addWidget(newEventButton)
         hbox.addWidget(refreshButton)
-        hbox.addWidget(removeEventButton)
+        hbox.addWidget(self.removeEventButton)
         vbox.addLayout(hbox)
         self.setLayout(vbox)
+
+    def rowChanged(self, row):
+        if row == -1:
+            self.disableRemove()
+        else:
+            self.enableRemove()
+
+    def enableRemove(self):
+        self.removeEventButton.setEnabled(True)
+
+    def disableRemove(self):
+        self.removeEventButton.setEnabled(False)
         
     def makeList(self):
         self.listWidget.clear()
@@ -73,6 +82,8 @@ class EventsPage(QtGui.QWidget):
             item = QtGui.QListWidgetItem()
             item.setText(event)
             self.listWidget.insertItem(i, item)
+        self.eventsCountLabel.setText("{number} events in '{eventsDir}'".format(number=self.eventList.numberOfEvents(),
+                                                                                eventsDir=self.config.eventsDir()))
         
     def getEvent(self):
         text = QtGui.QInputDialog.getText(self, 'New event',
@@ -88,21 +99,17 @@ class EventsPage(QtGui.QWidget):
             print 'Couldn\'t create {event}'.format(event=event)
 
     def removeEvent(self):
-        text = QtGui.QInputDialog.getText(self, 'Remove event',
-                                          'Event name:')
-        event = QStringToPythonString(text)
-
+        text = self.listWidget.currentItem().text()
+        event = str(text)
         try:
             self.eventList.removeEvent(event)
             self.makeList()
             self.repaint()
         except EventError:
-            print 'Couldn\'t remove {event}: not empty'.format(event=event)
+            print 'Couldn\'t remove {event}: not empty or directory does not exist'.format(event=event)
 
     def refreshEvents(self):
         self.makeList()
-        #this isn't done yet, because it needs to change the layout if there are no events.
-        #would it be easier to have two widgets?
 
 
 class MasterWidget(QtGui.QWidget):
