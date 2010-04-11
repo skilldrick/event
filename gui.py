@@ -53,6 +53,7 @@ class EventsPage(QtGui.QWidget):
         self.removeEventButton = QtGui.QPushButton('Remove Event')
         self.removeEventButton.clicked.connect(self.removeEvent)
         self.listWidget.currentRowChanged.connect(self.rowChanged)
+        self.disableRemove()
         
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(self.eventsCountLabel)
@@ -68,6 +69,7 @@ class EventsPage(QtGui.QWidget):
         if row == -1:
             self.disableRemove()
         else:
+            self.listWidget.setCurrentRow(row)
             self.enableRemove()
 
     def enableRemove(self):
@@ -141,17 +143,9 @@ class MyWidget(QtGui.QWidget):
         self.setGeometry(300, 300, 400, 293)
         self.setWindowTitle('My Widget!')
 
-        pixmap = self.convertImage(Image.open(imagePath))
-
+        pixmap = QtGui.QPixmap(imagePath)
         label = QtGui.QLabel('', self)
         label.setPixmap(pixmap)
-
-    def convertImage(self, image):
-        """Takes a PIL image and returns a QtPixmap"""
-        QtImage1 = ImageQt.ImageQt(image)
-        QtImage2 = QtGui.QImage(QtImage1)
-        pixmap = QtGui.QPixmap.fromImage(QtImage2)
-        return pixmap
 
 
 def main():
