@@ -6,7 +6,7 @@ from filesystem import Filesystem
 
 
 
-class AddEventError(IOError):
+class EventError(IOError):
     pass
 
 
@@ -21,10 +21,13 @@ class EventList:
     def loadEvents(self):
         self.events = []
         dirs = self.filesystem.listToplevelDirs(self.eventsDir)
-        self.numberOfDirs = len(dirs)
         for directory in dirs:
             self.events.append(directory)
         self.events.sort()
+
+    def numberOfEvents(self):
+        self.loadEvents()
+        return len(self.events)
 
     def getEvents(self):
         self.loadEvents()
@@ -34,7 +37,13 @@ class EventList:
         try:
             self.filesystem.makeDir([self.eventsDir, event])
         except IOError:
-            raise AddEventError
+            raise EventError
+
+    def removeEvent(self, event):
+        try:
+            self.filesystem.removeDir([self.eventsDir, event])
+        except OSError:
+            raise EventError
         
             
 class MockFilesystem (Filesystem):

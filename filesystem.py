@@ -58,7 +58,7 @@ class Filesystem:
     def listToplevelDirs(self, parent):
         try:
             root, dirs, files = os.walk(parent).next()
-        except StopIteration:
+        except StopIteration: #.next() doesn't work if no dirs
             root, dirs, files = [], [], []
         return dirs
 

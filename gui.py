@@ -6,7 +6,7 @@ import optparse
 import unittest
 
 from config import Config
-from eventlist import EventList, AddEventError
+from eventlist import EventList, EventError
 from filesystem import Filesystem
 from featurebroker import *
 
@@ -39,40 +39,40 @@ class EventsPage(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.listWidget = QtGui.QListWidget()
-        if self.eventList.numberOfDirs == 0:
-            self.layoutWithoutEvents()
-        else:
-            self.layoutWithEvents()
+        self.setupLayout()
         
-    def layoutWithEvents(self):
-        label = QtGui.QLabel("{number} events in '{eventsDir}'".format(number=self.eventList.numberOfDirs,
+    def setupLayout(self):
+        numberOfEvents = self.eventList.numberOfEvents()
+        if numberOfEvents > 0:
+            label = QtGui.QLabel("{number} events in '{eventsDir}'".format(number=numberOfEvents,
                                                                            eventsDir=self.config.eventsDir()))
-        self.makeList()
+            self.makeList()
+        else:
+            label = QtGui.QLabel("No events in '{eventsDir}'".format(eventsDir=self.config.eventsDir()))
         newEventButton = QtGui.QPushButton('New Event')
         newEventButton.clicked.connect(self.getEvent)
+        refreshButton = QtGui.QPushButton('Refresh')
+        refreshButton.clicked.connect(self.refreshEvents)
+        removeEventButton = QtGui.QPushButton('Remove Event')
+        removeEventButton.clicked.connect(self.removeEvent)
+        
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(label)
-        vbox.addWidget(self.listWidget)
-        vbox.addWidget(newEventButton)
+        if numberOfEvents > 0:
+            vbox.addWidget(self.listWidget)
+        hbox = QtGui.QHBoxLayout()
+        hbox.addWidget(newEventButton)
+        hbox.addWidget(refreshButton)
+        hbox.addWidget(removeEventButton)
+        vbox.addLayout(hbox)
         self.setLayout(vbox)
-
-    def layoutWithoutEvents(self):
-        label = QtGui.QLabel("No events in '{eventsDir}'".format(eventsDir=self.config.eventsDir()))
-        newEventButton = QtGui.QPushButton('New Event')
-        vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(label)
-        vbox.addWidget(newEventButton)
-        self.setLayout(vbox)
-
-
+        
     def makeList(self):
         self.listWidget.clear()
-        print 'count:', self.listWidget.count()
         for i, event in enumerate(self.eventList.getEvents()):
             item = QtGui.QListWidgetItem()
             item.setText(event)
             self.listWidget.insertItem(i, item)
-        print 'count:', self.listWidget.count()
         
     def getEvent(self):
         text = QtGui.QInputDialog.getText(self, 'New event',
@@ -84,14 +84,25 @@ class EventsPage(QtGui.QWidget):
             self.eventList.addEvent(event)
             self.makeList()
             self.repaint()
-        except AddEventError:
+        except EventError:
             print 'Couldn\'t create {event}'.format(event=event)
 
-    def removeEvent(self, event):
-        """What happens if the event has images in? Probably show error message"""
+    def removeEvent(self):
+        text = QtGui.QInputDialog.getText(self, 'Remove event',
+                                          'Event name:')
+        event = QStringToPythonString(text)
+
+        try:
+            self.eventList.removeEvent(event)
+            self.makeList()
+            self.repaint()
+        except EventError:
+            print 'Couldn\'t remove {event}: not empty'.format(event=event)
 
     def refreshEvents(self):
-        """Need to hook up a pushbutton to this"""
+        self.makeList()
+        #this isn't done yet, because it needs to change the layout if there are no events.
+        #would it be easier to have two widgets?
 
 
 class MasterWidget(QtGui.QWidget):
