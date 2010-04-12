@@ -10,6 +10,7 @@ def QStringToPythonString(QString):
 class EventsPage(QtGui.QWidget):
     config = RequiredFeature('Config', hasMethods('eventsDir'))
     eventList = RequiredFeature('EventList')
+    nextPage = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -30,6 +31,8 @@ class EventsPage(QtGui.QWidget):
         self.removeEventButton.clicked.connect(self.removeEvent)
         self.listWidget.currentRowChanged.connect(self.rowChanged)
         self.disableRemove()
+        self.continueButton = QtGui.QPushButton('Continue')
+        self.continueButton.clicked.connect(self.nextPage)
         
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(self.eventsCountLabel)
@@ -38,6 +41,7 @@ class EventsPage(QtGui.QWidget):
         hbox.addWidget(newEventButton)
         hbox.addWidget(refreshButton)
         hbox.addWidget(self.removeEventButton)
+        hbox.addWidget(self.continueButton)
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
