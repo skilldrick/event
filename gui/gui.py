@@ -21,8 +21,8 @@ class Stacked(QtGui.QStackedWidget):
         self.widget2 = CategoriesPage()
         self.widget3 = MyWidget('imagesdir/kitten.jpg')
         self.widget4 = MyWidget('imagesdir/kitten-portrait.jpg')
+        self.addWidget(self.widget2) #1 and 2 are swapped!!!
         self.addWidget(self.widget1)
-        self.addWidget(self.widget2)
         self.addWidget(self.widget3)
         self.addWidget(self.widget4)
 
@@ -38,7 +38,7 @@ class MasterWidget(QtGui.QWidget):
         QtGui.QWidget.__init__(self, parent)
         self.setGeometry(300, 300, 400, 400)
         self.setWindowTitle('My Widget!')
-        layout = QtGui.QVBoxLayout()
+        vbox = QtGui.QVBoxLayout()
         self.stacked = Stacked(self)
 
         self.previous = QtGui.QPushButton('Previous')
@@ -50,9 +50,9 @@ class MasterWidget(QtGui.QWidget):
         hbox.addWidget(self.previous)
         hbox.addWidget(self.next)
         
-        layout.addWidget(self.stacked)        
-        layout.addLayout(hbox)
-        self.setLayout(layout)
+        vbox.addWidget(self.stacked)        
+        vbox.addLayout(hbox)
+        self.setLayout(vbox)
 
 
 class MyWidget(QtGui.QWidget):
