@@ -10,6 +10,7 @@ from eventlist import EventList, EventError
 from filesystem import Filesystem
 from featurebroker import *
 from .eventspage import EventsPage
+from .categoriespage import CategoriesPage
 
 
 class Stacked(QtGui.QStackedWidget):
@@ -17,11 +18,13 @@ class Stacked(QtGui.QStackedWidget):
         QtGui.QStackedWidget.__init__(self, parent)
         self.widget1 = EventsPage()
         self.widget1.nextPage.connect(self.nextPage)
-        self.widget2 = MyWidget('imagesdir/kitten.jpg')
-        self.widget3 = MyWidget('imagesdir/kitten-portrait.jpg')
+        self.widget2 = CategoriesPage()
+        self.widget3 = MyWidget('imagesdir/kitten.jpg')
+        self.widget4 = MyWidget('imagesdir/kitten-portrait.jpg')
         self.addWidget(self.widget1)
         self.addWidget(self.widget2)
         self.addWidget(self.widget3)
+        self.addWidget(self.widget4)
 
     def nextPage(self):
         self.setCurrentIndex(self.currentIndex() + 1)

@@ -29,11 +29,10 @@ class EventsPage(QtGui.QWidget):
         refreshButton.clicked.connect(self.refreshEvents)
         self.removeEventButton = QtGui.QPushButton('Remove Event')
         self.removeEventButton.clicked.connect(self.removeEvent)
-        self.listWidget.currentRowChanged.connect(self.rowChanged)
-        self.disableRemove()
         self.continueButton = QtGui.QPushButton('Continue')
         self.continueButton.clicked.connect(self.nextPage)
-        
+        self.listWidget.currentRowChanged.connect(self.rowChanged)
+        self.disableButtons()
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(self.eventsCountLabel)
         vbox.addWidget(self.listWidget)
@@ -47,16 +46,18 @@ class EventsPage(QtGui.QWidget):
 
     def rowChanged(self, row):
         if row == -1:
-            self.disableRemove()
+            self.disableButtons()
         else:
             self.listWidget.setCurrentRow(row)
-            self.enableRemove()
+            self.enableButtons()
 
-    def enableRemove(self):
+    def enableButtons(self):
         self.removeEventButton.setEnabled(True)
+        self.continueButton.setEnabled(True)
 
-    def disableRemove(self):
+    def disableButtons(self):
         self.removeEventButton.setEnabled(False)
+        self.continueButton.setEnabled(False)
         
     def makeList(self):
         self.listWidget.clear()
