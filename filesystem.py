@@ -49,10 +49,11 @@ class Filesystem:
     def removeDir(self, dirname):
         os.rmdir(dirname)
 
+    @join
     def listDirs(self, root):
         ret = []
         for x in os.walk(root):
-            ret.append(x[0])
+            ret.append(x)
         return ret
 
     def listToplevelDirs(self, parent):
@@ -61,6 +62,10 @@ class Filesystem:
         except StopIteration: #.next() doesn't work if no dirs
             root, dirs, files = [], [], []
         return dirs
+
+    @join
+    def getBasename(self, dirname):
+        return os.path.basename(dirname)
 
     @join
     def listFiles(self, root):
@@ -79,11 +84,26 @@ class Filesystem:
         
 
 class FilesystemTests(unittest.TestCase):
+    newdirs = [
+        'testdir',
+        ['testdir', 'dir1'],
+        ['testdir', 'dir1', 'sub1'],
+        ['testdir', 'dir1', 'sub2'],
+        ['testdir', 'dir2'],
+        ['testdir', 'dir2', 'sub1'],
+        ['testdir', 'dir2', 'sub2'],
+        ['testdir', 'dir2', 'x, a dir with spaces'],
+        ]
+    
     def setUp(self):
         self.root = 'testdir'
         self.longDirname = ['testdir', 'newdir']
         self.filesystem = Filesystem()
         self.filesystem.makeDir(self.root)
+
+    def testGetBasename(self):
+        self.assertEqual(self.filesystem.getBasename(self.longDirname),
+                         self.longDirname[1])
         
     def testCheckDirExists(self):
         self.assertTrue(self.filesystem.checkDirExists(self.root))
@@ -106,29 +126,29 @@ class FilesystemTests(unittest.TestCase):
         self.filesystem.removeDir(self.longDirname)
         self.assertFalse(self.filesystem.checkDirExists(self.longDirname))
 
-    def testListDirs(self):
-        newdirs = [
-            'testdir',
-            ['testdir', 'dir1'],
-            ['testdir', 'dir1', 'sub1'],
-            ['testdir', 'dir1', 'sub2'],
-            ['testdir', 'dir2'],
-            ['testdir', 'dir2', 'sub1'],
-            ['testdir', 'dir2', 'sub2'],
-            ['testdir', 'dir2', 'x, a dir with spaces'],
-            ]
-        testToplevelDirs = ['dir1', 'dir2']
-        for newdir in newdirs:
+    def makeTestDirs(self):
+        for newdir in self.newdirs:
             self.filesystem.makeDir(newdir)
+
+    def removeTestDirs(self):
+        for newdir in reversed(self.newdirs):
+            self.filesystem.removeDir(newdir)
+
+    def testListDirs(self):
+        self.makeTestDirs()
         dirlist = self.filesystem.listDirs(self.root)
-        for listitem, diritem in zip(dirlist, newdirs):
-            self.assertEqual(listitem, self.filesystem.joinPath(diritem))
+        for listitem, diritem in zip(dirlist, self.newdirs):
+            self.assertEqual(listitem[0], self.filesystem.joinPath(diritem))
+        self.removeTestDirs()
+        
+    def testListTopLevelDirs(self):
+        self.makeTestDirs()
+        testToplevelDirs = ['dir1', 'dir2']
         toplevelDirs = self.filesystem.listToplevelDirs(self.root)
         for toplevelDir, testToplevelDir in zip(toplevelDirs,
                                                 testToplevelDirs):
             self.assertEqual(toplevelDir, testToplevelDir)
-        for newdir in reversed(newdirs):
-            self.filesystem.removeDir(newdir)
+        self.removeTestDirs()
 
     def testTopLevelDirsOnNonExistentDir(self):
         self.filesystem.listToplevelDirs('nonexistentdir')

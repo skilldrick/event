@@ -21,18 +21,31 @@ class CategoriesPage(QtGui.QWidget):
         self.tree = QtGui.QTreeWidget()
         self.tree.setColumnCount(1)
         self.tree.setHeaderLabel('Category')
-        items = [QtGui.QTreeWidgetItem(),
-                 QtGui.QTreeWidgetItem(),
-                 ]
+        topLevelText = ['Boys', 'Girls']
+        topLevelItems = self.makeListOfItems(topLevelText)
+        boys = self.makeListOfItems(['Under 8s', 'Under 9s', 'Under 10s'])
+        topLevelItems[0].insertChildren(0, boys)
+        girls = self.makeListOfItems(['Under 10s', 'Over 10s'])
+        topLevelItems[1].insertChildren(0, girls)
+        root = QtGui.QTreeWidgetItem()
+        root.setText(0, 'Rugby')
+        root.insertChildren(0, topLevelItems)
+                    
+        """
         subitem = QtGui.QTreeWidgetItem()
         subitem.setText(0, 'yo')
-        items[0].setText(0, 'hello')
-        items[0].insertChild(0, subitem)
-        items[1].setText(0, 'hi')
-        self.tree.insertTopLevelItems(0, items)
-
+        topLevelItems[0].insertChild(0, subitem)
+        """
+        self.tree.insertTopLevelItem(0, root)
+        
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(self.tree)
         self.setLayout(vbox)
         
-        
+    def makeListOfItems(self, listOfText):
+        listOfItems = []
+        for text in listOfText:
+            item = QtGui.QTreeWidgetItem()
+            item.setText(0, text)
+            listOfItems.append(item)
+        return listOfItems

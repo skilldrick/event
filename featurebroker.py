@@ -24,7 +24,7 @@ class FeatureBroker:
         return provider()
 
 
-features = FeatureBroker()
+features = FeatureBroker(True)
 
 ######################################################################
 ## 

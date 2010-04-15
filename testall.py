@@ -3,6 +3,7 @@ import unittest
 import eventlist
 import filesystem
 import photo
+import categories
 
 
 def main():
@@ -10,6 +11,7 @@ def main():
     suites.append(eventlist.suite())
     suites.append(filesystem.suite())
     suites.append(photo.suite())
+    suites.append(categories.suite())
     allTests = unittest.TestSuite(suites)
     runner = unittest.TextTestRunner()
     runner.run(allTests)
