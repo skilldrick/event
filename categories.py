@@ -6,27 +6,24 @@ from filesystem import Filesystem
 
 
 class Category:
-    children = []
-
     def __init__(self, name):
         self.name = name
 
 
 class CategoryTree:
-    def __init__(self):
-        self.root = None
+    children = []
+    def __init__(self, root):
+        self.root = root
 
-    def addNode(self, name):
-        return Category(name)
-
-    def insert(self, root, name):
-        self.children.append(self.addNode(name))
+    def insert(self, name):
+        self.children.append(CategoryTree(name))
         
 """Are the children in Category or in CategoryTree?
 c.f. http://code.activestate.com/recipes/286239/"""
 
 class Categories:
     filesystem = RequiredFeature('Filesystem')
+    tree = CategoryTree()
 
     def __init__(self):
         self.recurseList(self.filesystem.listDirs(['events', 'rugby']))
@@ -41,14 +38,32 @@ class Categories:
         firstItem = categoryList[0]
         children = firstItem[1]
         if len(children) == 0:
-            return
+            return None
         else:
             for child in children:
-                
+                #tree.insert
+                """Somehow need to transfer this recursive execution
+                into a tree data structure, I think.
+
+                Each CategoryTree will have a root (which will be its name)
+                and children (which will be other category trees).
+
+                So the top CategoryTree will be called 'Rugby' and have
+                'Boys' and 'Girls' as children. 'Boys' will have 9, 10 and
+                11 as children, 9 will have 'match1' and 'match2', and 10
+                and 11 will have no children.
+
+                Need to do this by adding the right functionality to
+                CategoryTree. Then write tests!
+
+                """
+                print '['
                 path = self.filesystem.joinPath([firstItem[0], child])
                 print self.categoryName(path), '  ', path
                 index = self.searchList(path, categoryList)
+                assert index != -1, 'path not in categoryList'
                 self.recurseList(categoryList[index:])
+                print ']'
                 
 
     def categoryName(self, dirname):
@@ -93,4 +108,32 @@ def main():
 if __name__ == '__main__':
     main()
 
-
+"""
+[
+    boys    events/rugby/boys
+    [
+        under 7s    events/rugby/boys/under 7s
+        [
+            match 1    events/rugby/boys/under 7s/match 1
+            ]
+        [
+            match 2    events/rugby/boys/under 7s/match 2
+            ]
+        ]
+    [
+        under 8s    events/rugby/boys/under 8s
+        ]
+    [
+        under 9s    events/rugby/boys/under 9s
+        ]
+    ]
+[
+    girls    events/rugby/girls
+    [
+        under 10s    events/rugby/girls/under 10s
+        ]
+    [
+        over 10s    events/rugby/girls/over 10s
+        ]
+    ]
+"""
