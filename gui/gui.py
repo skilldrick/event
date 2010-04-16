@@ -7,6 +7,7 @@ import unittest
 
 from config import Config
 from eventlist import EventList, EventError
+from categories import Categories
 from filesystem import Filesystem
 from featurebroker import *
 from .eventspage import EventsPage
@@ -72,6 +73,7 @@ def main():
     features.provide('Config', Config)
     features.provide('EventList', EventList)
     features.provide('Filesystem', Filesystem)
+    features.provide('Categories', Categories)
     masterWidget = MasterWidget()
     masterWidget.show()
     sys.exit(app.exec_())

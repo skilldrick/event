@@ -5,11 +5,6 @@ from config import Config
 from filesystem import Filesystem
 
 
-class Category:
-    def __init__(self, name):
-        self.name = name
-
-
 class CategoryTree:
     def __init__(self, root=''):
         self.children = []
@@ -21,19 +16,6 @@ class CategoryTree:
     def insertChild(self, tree):
         self.children.append(tree)
 
-
-"""
-def printTree(tree):
-    def innerPrint(tree, depth):
-        if len(tree.children) == 0:
-            print ' ' * depth, tree.root
-        else:
-            print ' ' * depth, tree.root
-            for child in tree.children:
-                innerPrint(child, depth + 1)
-    
-    innerPrint(tree, 0)
-"""
 
 def traverseTree(tree, func):
     def inner(tree, depth):
@@ -51,9 +33,24 @@ def printTree(tree):
         print ' ' * depth, tree.root
     traverseTree(tree, printfunc)
 
-
 def compareTree(tree1, tree2):
-    pass
+    tree1result = []
+    tree2result = []
+
+    def tree1inner(tree, depth):
+        tree1result.append((depth, tree.root))
+
+    def tree2inner(tree, depth):
+        tree2result.append((depth, tree.root))
+
+    traverseTree(tree1, tree1inner)
+    traverseTree(tree2, tree2inner)
+
+    for item1, item2 in zip(tree1result, tree2result):
+        if item1 != item2:
+            print item1[1], 'not equal to', item2[1]
+            return False
+    return True
 
 
 class Categories:
@@ -62,7 +59,9 @@ class Categories:
     def __init__(self):
         self.categoryTree = CategoryTree()
         self.recurseList(self.filesystem.listDirs(['events', 'rugby']), self.categoryTree)
-        printTree(self.categoryTree)
+
+    def getTree(self):
+        return self.categoryTree
 
     def searchList(self, needle, categoryList):
         for index, category in enumerate(categoryList):
@@ -88,9 +87,8 @@ class Categories:
                 path = self.filesystem.joinPath([firstItem[0], child])
                 indexOfChild = self.searchList(path, categoryList)
                 assert indexOfChild != -1, 'path not in categoryList'
-                """categoryList[indexOfChild:] is a shorter categoryList
-                with only elements from the child dir onwards
-                """
+                #categoryList[indexOfChild:] is a shorter categoryList
+                #with only elements from the child dir onwards
                 tree.insertChild(self.recurseList(categoryList[indexOfChild:], CategoryTree()))
             #return tree with children inserted
             return tree
@@ -110,8 +108,8 @@ class CategoriesTests(unittest.TestCase):
         boys.insertChild(under7)
         boys.insertChild(under8)
         boys.insertChild(under9)
-        under10 = CategoryTree('under 10')
-        over10 = CategoryTree('over 10')
+        under10 = CategoryTree('under 10s')
+        over10 = CategoryTree('over 10s')
         girls = CategoryTree('Girls')
         girls.insertChild(under10)
         girls.insertChild(over10)
@@ -123,25 +121,25 @@ class CategoriesTests(unittest.TestCase):
     def setUp(self):
         self.categories = Categories()
 
-    def testTest(self):
-        pass
+    def testBuildTree(self):
+        self.assertTrue(compareTree(self.categories.categoryTree,
+                                    self.makeTestTree()))
 
 
 class MockFilesystem(Filesystem):
     def listDirs(self, dirname):
         return [
-            ('events/rugby', ['boys', 'girls'], []),
-            ('events/rugby/boys', ['under 7s', 'under 8s', 'under 9s'], []),
-            ('events/rugby/boys/under 7s', ['match 1', 'match 2'], []),
-            ('events/rugby/boys/under 7s/match 1', [], []),
-            ('events/rugby/boys/under 7s/match 2', [], []),
-            ('events/rugby/boys/under 8s', [], []),
-            ('events/rugby/boys/under 9s', [], []),
-            ('events/rugby/girls', ['under 10s', 'over 10s'], []),
-            ('events/rugby/girls/under 10s', [], []),
-            ('events/rugby/girls/over 10s', [], []),
+            ('events/Rugby', ['Boys', 'Girls'], []),
+            ('events/Rugby/Boys', ['under 7s', 'under 8s', 'under 9s'], []),
+            ('events/Rugby/Boys/under 7s', ['Match 1', 'Match 2'], []),
+            ('events/Rugby/Boys/under 7s/Match 1', [], []),
+            ('events/Rugby/Boys/under 7s/Match 2', [], []),
+            ('events/Rugby/Boys/under 8s', [], []),
+            ('events/Rugby/Boys/under 9s', [], []),
+            ('events/Rugby/Girls', ['under 10s', 'over 10s'], []),
+            ('events/Rugby/Girls/under 10s', [], []),
+            ('events/Rugby/Girls/over 10s', [], []),
             ]
-
 
 
 def suite():
