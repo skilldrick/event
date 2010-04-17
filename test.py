@@ -5,27 +5,33 @@ class Widget(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
-        model = QtGui.QDirModel()
-        #model.setRootPath(QtCore.QDir.currentPath())
-        #print model.rootPath()
-        parentIndex = model.index(QtCore.QDir.currentPath())
-        print 'row:', parentIndex.row(), 'column:', parentIndex.column()
-        print model.isDir(parentIndex)
-        print model.data(parentIndex).toString()
+        #self.model = QtGui.QDirModel()
+        self.model = QtGui.QFileSystemModel()
+        currentPath = QtCore.QDir.currentPath()
+        root = '/'
+        self.model.setRootPath(currentPath)
+        parentIndex = self.model.index(currentPath)
 
-        childIndex = model.index(0, 0, parentIndex)
-        print model.data(childIndex).toString()
-
-        rows = model.rowCount(parentIndex)
+        rows = self.model.rowCount(parentIndex)
         print rows
+        print 'Has children?', self.model.hasChildren(parentIndex)
 
         treeView = QtGui.QTreeView()
-        treeView.setModel(model)
+        treeView.setModel(self.model)
         treeView.setRootIndex(parentIndex)
+        self.parentIndex = parentIndex
+
+        treeView.clicked.connect(self.printRowCount)
+        self.timer = QtCore.QTimer(self)
+        self.timer.singleShot(1, self.printRowCount)
+        
         
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(treeView)
         self.setLayout(vbox)
+
+    def printRowCount(self):
+        print 'rowCount', self.model.rowCount(self.parentIndex)
 
 
 def main():
