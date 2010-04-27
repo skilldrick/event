@@ -21,7 +21,21 @@ class CategoriesPage(QtGui.QWidget):
         for col in range(1, 4):
             self.view.hideColumn(col)
         self.view.setHeaderHidden(True)
+
+        button = QtGui.QPushButton('Add event')
+        button.clicked.connect(self.addEvent)
+        
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(self.view)
+        vbox.addWidget(button)
         self.setLayout(vbox)
 
+    def addEvent(self):
+        selectionModel = self.view.selectionModel()
+        indexes = selectionModel.selectedIndexes()
+        if indexes:
+            index = indexes[0]
+            print self.model.data(index).toString()
+        else:
+            #nothing selected
+            pass
