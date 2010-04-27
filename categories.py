@@ -21,11 +21,11 @@ class Categories(QtGui.QFileSystemModel):
         to update. Or edit the treeview?
         """
 
-    def addEvent(self):
-        parent = self.index(0, 0, QtCore.QModelIndex())
-        print parent.data().toString()
-        #print 'newEvent', parent
-        #self.mkdir(parent, 'newEvent')
+    def addCategory(self, parent, name):
+        self.mkdir(parent, name)
+
+    def removeCategory(self, parent):
+        self.rmdir(parent)
 
 
 class CategoriesTests(unittest.TestCase):

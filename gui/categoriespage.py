@@ -1,10 +1,12 @@
 from PyQt4 import QtCore, QtGui
 
 from featurebroker import *
+from config import Config
 from categories import Categories
 
 class CategoriesPage(QtGui.QWidget):
-    categories = RequiredFeature('Categories')
+    config = RequiredFeature('Config')
+    #categories = RequiredFeature('Categories')
 
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -12,7 +14,9 @@ class CategoriesPage(QtGui.QWidget):
 
     def setupLayout(self):
         self.model = Categories(self)
-        currentPath = QtCore.QDir.currentPath()
+        currentEventPath = 'events/rugby'
+        #currentPath = QtCore.QDir.currentPath()
+        currentPath = currentEventPath
         self.model.setRootPath(currentPath)
         currentPathIndex = self.model.index(currentPath)
         self.view = QtGui.QTreeView()
@@ -22,20 +26,33 @@ class CategoriesPage(QtGui.QWidget):
             self.view.hideColumn(col)
         self.view.setHeaderHidden(True)
 
-        button = QtGui.QPushButton('Add event')
-        button.clicked.connect(self.addEvent)
+        addCatButton = QtGui.QPushButton('Add category')
+        addCatButton.clicked.connect(self.addCategory)
+        removeCatButton = QtGui.QPushButton('Remove category')
+        removeCatButton.clicked.connect(self.removeCategory)
         
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(self.view)
-        vbox.addWidget(button)
+        vbox.addWidget(removeCatButton)
+        vbox.addWidget(addCatButton)
         self.setLayout(vbox)
 
-    def addEvent(self):
+    def addCategory(self):
+        selectedIndex = self.getSelectedIndex()
+        if selectedIndex:
+            self.model.addCategory(selectedIndex, 'newCat')
+
+    def removeCategory(self):
+        selectedIndex = self.getSelectedIndex()
+        if selectedIndex:
+            self.model.removeCategory(selectedIndex)
+        
+
+    def getSelectedIndex(self):
         selectionModel = self.view.selectionModel()
-        indexes = selectionModel.selectedIndexes()
-        if indexes:
-            index = indexes[0]
-            print self.model.data(index).toString()
+        selectedRow = selectionModel.selectedIndexes()
+        if selectedRow:
+            return selectedRow[0]
         else:
-            #nothing selected
-            pass
+            return None
+
