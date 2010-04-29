@@ -7,25 +7,19 @@ from filesystem import Filesystem
 
 
 class Categories(QtGui.QFileSystemModel):
-    def __init__(self, parent):
-        QtGui.QFileSystemModel.__init__(self, parent)
+    def __init__(self, widget):
+        QtGui.QFileSystemModel.__init__(self, widget)
         self.setFilter(QtCore.QDir.AllDirs |
                        QtCore.QDir.Dirs |
                        QtCore.QDir.NoDotAndDotDot)
         #Need to see if it's possible/worth it to test
         #this class. Maybe, depends how complex it gets.
 
-        """
-        Implement a way to add a new dir. Maybe through
-        filesystem.py? Then send a signal to CategoriesPage
-        to update. Or edit the treeview?
-        """
-
     def addCategory(self, parent, name):
-        self.mkdir(parent, name)
+        return self.mkdir(parent, name)
 
-    def removeCategory(self, parent):
-        self.rmdir(parent)
+    def removeCategory(self, categoryIndex):
+        return self.rmdir(categoryIndex)
 
 
 class CategoriesTests(unittest.TestCase):
@@ -34,7 +28,6 @@ class CategoriesTests(unittest.TestCase):
 
 
 def suite():
-    #features.provide('Filesystem', MockFilesystem)
     features.provide('Config', Config)
     testSuite = unittest.makeSuite(CategoriesTests)
     return testSuite

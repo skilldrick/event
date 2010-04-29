@@ -22,8 +22,8 @@ class Stacked(QtGui.QStackedWidget):
         self.widget2 = CategoriesPage()
         self.widget3 = MyWidget('imagesdir/kitten.jpg')
         self.widget4 = MyWidget('imagesdir/kitten-portrait.jpg')
-        self.addWidget(self.widget2) #1 and 2 are swapped!!!
         self.addWidget(self.widget1)
+        self.addWidget(self.widget2)
         self.addWidget(self.widget3)
         self.addWidget(self.widget4)
 

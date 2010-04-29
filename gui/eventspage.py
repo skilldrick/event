@@ -1,11 +1,7 @@
 from PyQt4 import QtCore, QtGui
 
 from featurebroker import *
-
-
-def QStringToPythonString(QString):
-    return str(QString[0].toAscii())
-
+import functions
 
 class EventsPage(QtGui.QWidget):
     config = RequiredFeature('Config', hasMethods('eventsDir'))
@@ -69,9 +65,11 @@ class EventsPage(QtGui.QWidget):
                                                                                 eventsDir=self.config.eventsDir()))
         
     def getEvent(self):
-        text = QtGui.QInputDialog.getText(self, 'New event',
+        qtText = QtGui.QInputDialog.getText(self, 'New event',
                                           'Event name:')
-        self.addEvent(QStringToPythonString(text))
+        text = functions.QStringToPythonString(qtText)
+        if len(text) > 0:
+            self.addEvent(functions.QStringToPythonString(text))
 
     def addEvent(self, event):
         try:

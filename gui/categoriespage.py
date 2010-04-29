@@ -3,9 +3,11 @@ from PyQt4 import QtCore, QtGui
 from featurebroker import *
 from config import Config
 from categories import Categories
+import functions
 
 class CategoriesPage(QtGui.QWidget):
     config = RequiredFeature('Config')
+    filesystem = RequiredFeature('Filesystem')
     #categories = RequiredFeature('Categories')
 
     def __init__(self, parent=None):
@@ -13,44 +15,80 @@ class CategoriesPage(QtGui.QWidget):
         self.setupLayout()
 
     def setupLayout(self):
-        self.model = Categories(self)
-        currentEventPath = 'events/rugby'
-        #currentPath = QtCore.QDir.currentPath()
-        currentPath = currentEventPath
-        self.model.setRootPath(currentPath)
-        currentPathIndex = self.model.index(currentPath)
+        #Need to pass self to Categories so can't use
+        #straight DI. Could use a setter instead, but then
+        #Categories would be left in an unconstructed state.
         self.view = QtGui.QTreeView()
+        self.addCatButton = QtGui.QPushButton('Add category')
+        self.addCatButton.clicked.connect(self.getCategory)
+        self.addCatButton.setEnabled(False)
+        self.removeCatButton = QtGui.QPushButton('Remove category')
+        self.removeCatButton.clicked.connect(self.removeCategory)
+        self.removeCatButton.setEnabled(False)
+
+        self.currentEventLabel = QtGui.QLabel('No event set')
+        
+        vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(self.currentEventLabel)
+        vbox.addWidget(self.view)
+        vbox.addWidget(self.removeCatButton)
+        vbox.addWidget(self.addCatButton)
+        self.setLayout(vbox)
+        self.setEvent('rugby')
+
+    def setEvent(self, eventName):
+        self.model = Categories(self)
+        self.currentEventLabel.setText('Categories in ' + eventName)
         self.view.setModel(self.model)
-        self.view.setRootIndex(currentPathIndex)
         for col in range(1, 4):
             self.view.hideColumn(col)
         self.view.setHeaderHidden(True)
+        currentEventPath = self.filesystem.joinPath([
+                self.config.eventsDir(),
+                eventName,
+                ])
+        self.model.setRootPath(currentEventPath)
+        currentPathIndex = self.model.index(currentEventPath)
 
-        addCatButton = QtGui.QPushButton('Add category')
-        addCatButton.clicked.connect(self.addCategory)
-        removeCatButton = QtGui.QPushButton('Remove category')
-        removeCatButton.clicked.connect(self.removeCategory)
+        self.view.setRootIndex(currentPathIndex)
+        self.addCatButton.setEnabled(True)
+        self.removeCatButton.setEnabled(True)
         
-        vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(self.view)
-        vbox.addWidget(removeCatButton)
-        vbox.addWidget(addCatButton)
-        self.setLayout(vbox)
 
-    def addCategory(self):
+    def getCategory(self):
+        qtText = QtGui.QInputDialog.getText(self, 'New category',
+                                          'Category name:')
+        text = functions.QStringToPythonString(qtText)
+        if len(text) > 0:
+            self.addCategory(text)
+
+    def addCategory(self, categoryName):
         selectedIndex = self.getSelectedIndex()
         if selectedIndex:
-            self.model.addCategory(selectedIndex, 'newCat')
+            if not self.model.addCategory(selectedIndex, categoryName):
+                print 'addCategory failed'
 
     def removeCategory(self):
         selectedIndex = self.getSelectedIndex()
         if selectedIndex:
-            self.model.removeCategory(selectedIndex)
+            if not self.model.removeCategory(selectedIndex):
+                self.categoryRemoveFailed()
+            #if remove doesn't work (directory has children)
+            #then show dialog informing user of this fact
+
+    def categoryRemoveFailed(self):
+        title = 'Cannot remove category'
+        message = 'This category cannot be removed.\n'
+        message += 'Only empty categories can be removed.'
+        QtGui.QMessageBox.warning(self, title, message)
         
 
     def getSelectedIndex(self):
         selectionModel = self.view.selectionModel()
         selectedRow = selectionModel.selectedIndexes()
+        #this is a row of the model. Column [0] is the directory,
+        #which can have children. The other columns can't
+        #have children, but just contain metadata about the directory.
         if selectedRow:
             return selectedRow[0]
         else:
