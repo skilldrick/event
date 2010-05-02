@@ -35,6 +35,13 @@ class CategoriesPage(QtGui.QWidget):
         vbox.addWidget(self.addCatButton)
         self.setLayout(vbox)
         self.setEvent('rugby')
+        """setEvent should be called from eventspage.py
+        when next is pressed. In fact, eventspage.py probably
+        needs rewriting to take advantage of QFileSystemModel.
+        It just needs a one-dimensional view of the events
+        directory, i.e. just the top level dirs. I think
+        filesystem.py was a big waste of time (but fun anyway).
+        """
 
     def setEvent(self, eventName):
         self.model = Categories(self)
