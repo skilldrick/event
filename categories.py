@@ -6,19 +6,18 @@ from config import Config
 from filesystem import Filesystem
 
 
+#this name is wrong now. Come up with a better one
 class Categories(QtGui.QFileSystemModel):
     def __init__(self, widget):
         QtGui.QFileSystemModel.__init__(self, widget)
         self.setFilter(QtCore.QDir.AllDirs |
                        QtCore.QDir.Dirs |
                        QtCore.QDir.NoDotAndDotDot)
-        #Need to see if it's possible/worth it to test
-        #this class. Maybe, depends how complex it gets.
 
-    def addCategory(self, parent, name):
+    def addItem(self, parent, name):
         return self.mkdir(parent, name)
 
-    def removeCategory(self, categoryIndex):
+    def removeItem(self, categoryIndex):
         return self.rmdir(categoryIndex)
 
 
