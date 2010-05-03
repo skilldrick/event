@@ -18,8 +18,8 @@ class Shared(QtGui.QWidget):
     def getItem(self):
         title = 'New {item}'.format(item=self.itemStrings['singularLower'])
         body = '{item} name:'.format(item=self.itemStrings['singularCaps'])
-        qtText = QtGui.QInputDialog.getText(self, title, body)
-        text = functions.QStringToPythonString(qtText)
+        qtText = QtGui.QInputDialog.getText(self, title, body)[0]
+        text = str(qtText)
         if len(text) > 0:
             self.addItem(text)
 
@@ -48,4 +48,9 @@ class Shared(QtGui.QWidget):
             return selectedRow[0]
         else:
             return None
-    
+
+    def getSelectedName(self):
+        index = self.getSelectedIndex()
+        return self.model.data(index).toString()
+        
+        

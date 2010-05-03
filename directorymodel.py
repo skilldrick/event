@@ -6,8 +6,7 @@ from config import Config
 from filesystem import Filesystem
 
 
-#this name is wrong now. Come up with a better one
-class Categories(QtGui.QFileSystemModel):
+class DirectoryModel(QtGui.QFileSystemModel):
     def __init__(self, widget):
         QtGui.QFileSystemModel.__init__(self, widget)
         self.setFilter(QtCore.QDir.AllDirs |
@@ -21,14 +20,14 @@ class Categories(QtGui.QFileSystemModel):
         return self.rmdir(categoryIndex)
 
 
-class CategoriesTests(unittest.TestCase):
+class DirectoryModelTests(unittest.TestCase):
     def setUp(self):
-        self.categories = Categories()
+        self.directoryModel = DirectoryModel()
 
 
 def suite():
     features.provide('Config', Config)
-    testSuite = unittest.makeSuite(CategoriesTests)
+    testSuite = unittest.makeSuite(DirectoryModelTests)
     return testSuite
 
     

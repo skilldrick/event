@@ -2,9 +2,12 @@ from PyQt4 import QtCore, QtGui
 
 from featurebroker import *
 from config import Config
-from categories import Categories
+from directorymodel import DirectoryModel
 from shared import Shared
 import functions
+
+#include root item in view? That way it is easy to add top-level
+#children or lower-level children.
 
 class CategoriesPage(Shared):
     config = RequiredFeature('Config')
@@ -33,16 +36,13 @@ class CategoriesPage(Shared):
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(self.currentEventLabel)
         vbox.addWidget(self.view)
-p        vbox.addWidget(self.removeCatButton)
+        vbox.addWidget(self.removeCatButton)
         vbox.addWidget(self.addCatButton)
         self.setLayout(vbox)
-        self.setEvent('rugby')
-        """setEvent should be called from eventspage.py
-        when next is pressed.
-        """
 
     def setEvent(self, eventName):
-        self.model = Categories(self)
+        eventName = str(eventName)
+        self.model = DirectoryModel(self)
         self.currentEventLabel.setText('Categories in ' + eventName)
         self.view.setModel(self.model)
         for col in range(1, 4):
@@ -61,7 +61,10 @@ p        vbox.addWidget(self.removeCatButton)
         
     def addItem(self, categoryName):
         selectedIndex = self.getSelectedIndex()
-        if selectedIndex:
-            if not self.model.addItem(selectedIndex, categoryName):
-                print 'addItem failed'
+        if not selectedIndex:
+            selectedIndex = self.view.rootIndex()
+        success = self.model.addItem(selectedIndex, categoryName)
+        if not success:
+            print 'addItem failed'
+
 

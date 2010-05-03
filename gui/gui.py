@@ -18,8 +18,9 @@ class Stacked(QtGui.QStackedWidget):
     def __init__(self, parent=None):
         QtGui.QStackedWidget.__init__(self, parent)
         self.widget1 = EventsPage()
-        self.widget1.nextPage.connect(self.nextPage)
         self.widget2 = CategoriesPage()
+        self.widget1.nextPage.connect(self.nextPage)
+        self.widget1.setEvent.connect(self.widget2.setEvent)
         self.widget3 = MyWidget('imagesdir/kitten.jpg')
         self.widget4 = MyWidget('imagesdir/kitten-portrait.jpg')
         self.addWidget(self.widget1)

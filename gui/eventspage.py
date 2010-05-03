@@ -2,11 +2,12 @@ from PyQt4 import QtCore, QtGui
 
 from featurebroker import *
 import functions
-from categories import Categories
-from shared import Shared
+from directorymodel import DirectoryModel
+from .shared import Shared
 
 class EventsPage(Shared):
-    config = RequiredFeature('Config', hasMethods('eventsDir'))
+    config = RequiredFeature('Config')
+    setEvent = QtCore.pyqtSignal(str)
     nextPage = QtCore.pyqtSignal()
     itemStrings = {'singularCaps': 'Event',
                    'singularLower': 'event',
@@ -21,7 +22,7 @@ class EventsPage(Shared):
         
     def setupLayout(self):
         self.view = QtGui.QListView()
-        self.model = Categories(self)
+        self.model = DirectoryModel(self)
         self.view.setModel(self.model)
         self.model.setRootPath(self.config.eventsDir())
         self.eventsDirIndex = self.model.index(self.config.eventsDir())
@@ -32,7 +33,7 @@ class EventsPage(Shared):
         self.removeEventButton = QtGui.QPushButton('Remove Event')
         self.removeEventButton.clicked.connect(self.removeItem)
         self.continueButton = QtGui.QPushButton('Continue')
-        self.continueButton.clicked.connect(self.nextPage)
+        self.continueButton.clicked.connect(self.sendIndexToNextPage)
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(self.eventsCountLabel)
         vbox.addWidget(self.view)
@@ -42,6 +43,10 @@ class EventsPage(Shared):
         hbox.addWidget(self.continueButton)
         vbox.addLayout(hbox)
         self.setLayout(vbox)
+
+    def sendIndexToNextPage(self):
+        self.setEvent.emit(self.getSelectedName())
+        self.nextPage.emit()
 
     def enableButtons(self):
         self.removeEventButton.setEnabled(True)
