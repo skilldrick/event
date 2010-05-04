@@ -9,6 +9,13 @@ import functions
 #include root item in view? That way it is easy to add top-level
 #children or lower-level children.
 
+
+class DeselectableTreeView(QtGui.QTreeView):
+    def mousePressEvent(self, event):
+        self.clearSelection()
+        QtGui.QTreeView.mousePressEvent(self, event)
+
+
 class CategoriesPage(Shared):
     config = RequiredFeature('Config')
     filesystem = RequiredFeature('Filesystem')
@@ -23,7 +30,7 @@ class CategoriesPage(Shared):
         self.setupLayout()
 
     def setupLayout(self):
-        self.view = QtGui.QTreeView()
+        self.view = DeselectableTreeView()
         self.addCatButton = QtGui.QPushButton('Add category')
         self.addCatButton.clicked.connect(self.getItem)
         self.addCatButton.setEnabled(False)
