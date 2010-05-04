@@ -7,7 +7,9 @@ from filesystem import Filesystem
 
 
 class DirectoryModel(QtGui.QFileSystemModel):
-    def __init__(self, widget):
+    config = RequiredFeature('Config')
+    
+    def __init__(self, widget, eventName=''):
         QtGui.QFileSystemModel.__init__(self, widget)
         self.setFilter(QtCore.QDir.AllDirs |
                        QtCore.QDir.Dirs |

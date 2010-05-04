@@ -51,6 +51,9 @@ class Shared(QtGui.QWidget):
 
     def getSelectedName(self):
         index = self.getSelectedIndex()
-        return self.model.data(index).toString()
+        if index:
+            return self.model.data(index).toString()
+        else:
+            return None
         
         

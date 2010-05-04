@@ -42,7 +42,7 @@ class CategoriesPage(Shared):
 
     def setEvent(self, eventName):
         eventName = str(eventName)
-        self.model = DirectoryModel(self)
+        self.model = DirectoryModel(self, eventName)
         self.currentEventLabel.setText('Categories in ' + eventName)
         self.view.setModel(self.model)
         for col in range(1, 4):
@@ -52,6 +52,9 @@ class CategoriesPage(Shared):
                 self.config.eventsDir(),
                 eventName,
                 ])
+        #currentEventPath = self.config.eventsDir() #delete this line
+        #need to find some way to either insert the parent
+        #or remove the siblings of the parent
         self.model.setRootPath(currentEventPath)
         currentPathIndex = self.model.index(currentEventPath)
 

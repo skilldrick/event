@@ -45,8 +45,12 @@ class EventsPage(Shared):
         self.setLayout(vbox)
 
     def sendIndexToNextPage(self):
-        self.setEvent.emit(self.getSelectedName())
-        self.nextPage.emit()
+        eventName = self.getSelectedName()
+        if eventName:
+            self.setEvent.emit(eventName)
+            self.nextPage.emit()
+        else:
+            print 'No event selected'
 
     def enableButtons(self):
         self.removeEventButton.setEnabled(True)
