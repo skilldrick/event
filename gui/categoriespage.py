@@ -6,12 +6,11 @@ from directorymodel import DirectoryModel
 from shared import Shared
 import functions
 
-#include root item in view? That way it is easy to add top-level
-#children or lower-level children.
-
 
 class DeselectableTreeView(QtGui.QTreeView):
     def mousePressEvent(self, event):
+        """When the TreeView is clicked, the selection is cleared.
+        If an item is clicked, QTreeView.mousePressEvent() selects it"""
         self.clearSelection()
         QtGui.QTreeView.mousePressEvent(self, event)
 
@@ -24,6 +23,7 @@ class CategoriesPage(Shared):
                    'pluralCaps': 'Categories',
                    'pluralLower': 'categories',
                    }
+    previousPage = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
         Shared.__init__(self, parent)
@@ -31,26 +31,29 @@ class CategoriesPage(Shared):
 
     def setupLayout(self):
         self.view = DeselectableTreeView()
+        self.backButton = QtGui.QPushButton('Back')
+        self.backButton.clicked.connect(self.previousPage)
         self.addCatButton = QtGui.QPushButton('Add category')
         self.addCatButton.clicked.connect(self.getItem)
-        self.addCatButton.setEnabled(False)
         self.removeCatButton = QtGui.QPushButton('Remove category')
         self.removeCatButton.clicked.connect(self.removeItem)
-        self.removeCatButton.setEnabled(False)
 
         self.currentEventLabel = QtGui.QLabel('No event set')
         
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(self.currentEventLabel)
         vbox.addWidget(self.view)
-        vbox.addWidget(self.removeCatButton)
-        vbox.addWidget(self.addCatButton)
+        hbox = QtGui.QHBoxLayout()
+        hbox.addWidget(self.backButton)
+        hbox.addWidget(self.removeCatButton)
+        hbox.addWidget(self.addCatButton)
+        vbox.addLayout(hbox)
         self.setLayout(vbox)
 
     def setEvent(self, eventName):
         eventName = str(eventName)
         self.model = DirectoryModel(self, eventName)
-        self.currentEventLabel.setText('Categories in ' + eventName)
+        self.currentEventLabel.setText('Set up categories in ' + eventName + ':')
         self.view.setModel(self.model)
         for col in range(1, 4):
             self.view.hideColumn(col)
@@ -59,9 +62,6 @@ class CategoriesPage(Shared):
                 self.config.eventsDir(),
                 eventName,
                 ])
-        #currentEventPath = self.config.eventsDir() #delete this line
-        #need to find some way to either insert the parent
-        #or remove the siblings of the parent
         self.model.setRootPath(currentEventPath)
         currentPathIndex = self.model.index(currentEventPath)
 

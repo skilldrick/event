@@ -17,12 +17,15 @@ class EventsPage(Shared):
 
     def __init__(self, parent=None):
         Shared.__init__(self, parent)
+        self.timer = QtCore.QTimer(self)
         self.setupLayout()
+        self.updateLabelTimer()
         self.eventErrorDialog = QtGui.QErrorMessage(self)
         
     def setupLayout(self):
         self.view = QtGui.QListView()
         self.model = DirectoryModel(self)
+        self.model.modelChanged.connect(self.updateLabelTimer)
         self.view.setModel(self.model)
         self.model.setRootPath(self.config.eventsDir())
         self.eventsDirIndex = self.model.index(self.config.eventsDir())
@@ -43,6 +46,24 @@ class EventsPage(Shared):
         hbox.addWidget(self.continueButton)
         vbox.addLayout(hbox)
         self.setLayout(vbox)
+
+    def updateLabelTimer(self):
+        #updateLabel() has to happen in a different thread:
+        self.timer.singleShot(0, self.updateLabel)
+        #If it fires too soon, 100ms should be enough:
+        self.timer.singleShot(100, self.updateLabel)
+
+
+    def updateLabel(self):
+        index = self.view.rootIndex()
+        count = self.model.rowCount(index)
+        if count > 1:
+            s = 's'
+        else:
+            s = ''
+        labelText = str(count) + ' event' + s + ' in <em>'
+        labelText += self.config.eventsDir() + '</em>'
+        self.eventsCountLabel.setText(labelText)
 
     def sendIndexToNextPage(self):
         eventName = self.getSelectedName()

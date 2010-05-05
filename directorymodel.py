@@ -8,6 +8,7 @@ from filesystem import Filesystem
 
 class DirectoryModel(QtGui.QFileSystemModel):
     config = RequiredFeature('Config')
+    modelChanged = QtCore.pyqtSignal()
     
     def __init__(self, widget, eventName=''):
         QtGui.QFileSystemModel.__init__(self, widget)
@@ -16,11 +17,14 @@ class DirectoryModel(QtGui.QFileSystemModel):
                        QtCore.QDir.NoDotAndDotDot)
 
     def addItem(self, parent, name):
-        return self.mkdir(parent, name)
+        success = self.mkdir(parent, name)
+        self.modelChanged.emit()
+        return success
 
     def removeItem(self, categoryIndex):
-        return self.rmdir(categoryIndex)
-
+        success = self.rmdir(categoryIndex)
+        self.modelChanged.emit()
+        return success
 
 class DirectoryModelTests(unittest.TestCase):
     def setUp(self):
