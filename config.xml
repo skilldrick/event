@@ -1,1 +1,21 @@
-<config><sourcelist><item><name>Memory card</name><location>D:/</location></item><item><name>Temp folder</name><location>C:/Photos</location></item></sourcelist></config>
+
+    <config>
+    <sourcelist>
+    <item>
+    <name>
+    Memory card
+    </name>
+    <location>
+    D:/
+    </location>
+    </item>
+    <item>
+    <name>
+    Temp folder
+    </name>
+    <location>
+    C:/Photos
+    </location>
+    </item>
+    </sourcelist>
+    </config>
