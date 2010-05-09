@@ -5,6 +5,7 @@ import functions
 
 class SourceDestPage(QtGui.QWidget):
     config = RequiredFeature('Config')
+    sourceList = RequiredFeature('SourceList')
     previousPage = QtCore.pyqtSignal()
     nextPage = QtCore.pyqtSignal()
 
@@ -16,6 +17,7 @@ class SourceDestPage(QtGui.QWidget):
     def setupLayout(self):
         label = QtGui.QLabel('Select source and destination for import:')
         self.sourceView = QtGui.QListView()
+        self.sourceView.setModel(self.sourceList)
         self.destinationView = QtGui.QListView()
         self.backButton = QtGui.QPushButton('Back')
         self.backButton.clicked.connect(self.previousPage)

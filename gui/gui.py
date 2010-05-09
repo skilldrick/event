@@ -9,6 +9,7 @@ from config import Config
 from eventlist import EventList, EventError
 from categories import Categories
 from filesystem import Filesystem
+from sourcedestination import SourceList
 from featurebroker import *
 from .eventspage import EventsPage
 from .categoriespage import CategoriesPage
@@ -79,6 +80,7 @@ def main():
     features.provide('EventList', EventList)
     features.provide('Filesystem', Filesystem)
     features.provide('Categories', Categories)
+    features.provide('SourceList', SourceList)
     masterWidget = MasterWidget()
     masterWidget.show()
     sys.exit(app.exec_())
