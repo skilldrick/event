@@ -12,6 +12,7 @@ from filesystem import Filesystem
 from featurebroker import *
 from .eventspage import EventsPage
 from .categoriespage import CategoriesPage
+from .sourcedestpage import SourceDestPage
 
 
 class Stacked(QtGui.QStackedWidget):
@@ -22,7 +23,9 @@ class Stacked(QtGui.QStackedWidget):
         self.widget1.nextPage.connect(self.nextPage)
         self.widget1.setEvent.connect(self.widget2.setEvent)
         self.widget2.previousPage.connect(self.previousPage)
-        self.widget3 = MyWidget('imagesdir/kitten.jpg')
+        self.widget2.nextPage.connect(self.nextPage)
+        self.widget3 = SourceDestPage()
+        self.widget3.previousPage.connect(self.previousPage)
         self.widget4 = MyWidget('imagesdir/kitten-portrait.jpg')
         self.addWidget(self.widget1)
         self.addWidget(self.widget2)

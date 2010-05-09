@@ -18,6 +18,7 @@ class EventsPage(Shared):
     def __init__(self, parent=None):
         Shared.__init__(self, parent)
         self.timer = QtCore.QTimer(self)
+        self.setEvent.connect(self.config.setEvent)
         self.setupLayout()
         self.updateLabelTimer()
         self.eventErrorDialog = QtGui.QErrorMessage(self)

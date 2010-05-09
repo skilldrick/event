@@ -24,6 +24,7 @@ class CategoriesPage(Shared):
                    'pluralLower': 'categories',
                    }
     previousPage = QtCore.pyqtSignal()
+    nextPage = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
         Shared.__init__(self, parent)
@@ -37,6 +38,8 @@ class CategoriesPage(Shared):
         self.addCatButton.clicked.connect(self.getItem)
         self.removeCatButton = QtGui.QPushButton('Remove category')
         self.removeCatButton.clicked.connect(self.removeItem)
+        self.continueButton = QtGui.QPushButton('Continue')
+        self.continueButton.clicked.connect(self.nextPage)
 
         self.currentEventLabel = QtGui.QLabel('No event set')
         
@@ -47,6 +50,7 @@ class CategoriesPage(Shared):
         hbox.addWidget(self.backButton)
         hbox.addWidget(self.removeCatButton)
         hbox.addWidget(self.addCatButton)
+        hbox.addWidget(self.continueButton)
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
