@@ -33,9 +33,12 @@ class Shared(QtGui.QWidget):
                 self.itemRemoveFailed()
 
     def itemRemoveFailed(self):
-        title = 'Cannot remove category'
-        message = 'This category cannot be removed.\n'
-        message += 'Only empty categories can be removed.'
+        title = 'Cannot remove {item}'.format(
+            item=self.itemStrings['singularLower'])
+        message = 'This {item} cannot be removed.\n'.format(
+            item=self.itemStrings['singularLower'])
+        message += 'Only empty {items} can be removed.'.format(
+            items=self.itemStrings['pluralLower'])
         QtGui.QMessageBox.warning(self, title, message)
 
     def getSelectedIndex(self):

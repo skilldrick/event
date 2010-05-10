@@ -5,6 +5,7 @@ from config import Config
 from directorymodel import DirectoryModel
 from shared import Shared
 import functions
+from categoryview import CategoryView
 
 
 class DeselectableTreeView(QtGui.QTreeView):
@@ -31,7 +32,7 @@ class CategoriesPage(Shared):
         self.setupLayout()
 
     def setupLayout(self):
-        self.view = DeselectableTreeView()
+        self.view = CategoryView()
         self.backButton = QtGui.QPushButton('Back')
         self.backButton.clicked.connect(self.previousPage)
         self.addCatButton = QtGui.QPushButton('Add category')
