@@ -5,7 +5,7 @@ from config import Config
 from directorymodel import DirectoryModel
 from shared import Shared
 import functions
-from categoryview import CategoryView
+from categorywidget import CategoryWidget
 
 
 class DeselectableTreeView(QtGui.QTreeView):
@@ -16,7 +16,7 @@ class DeselectableTreeView(QtGui.QTreeView):
         QtGui.QTreeView.mousePressEvent(self, event)
 
 
-class CategoriesPage(Shared):
+class CategoriesPage(QtGui.QWidget):
     config = RequiredFeature('Config')
     filesystem = RequiredFeature('Filesystem')
     itemStrings = {'singularCaps': 'Category',
@@ -32,7 +32,7 @@ class CategoriesPage(Shared):
         self.setupLayout()
 
     def setupLayout(self):
-        self.view = CategoryView()
+        self.categoryWidget = CategoryWidget()
         self.backButton = QtGui.QPushButton('Back')
         self.backButton.clicked.connect(self.previousPage)
         self.addCatButton = QtGui.QPushButton('Add category')
@@ -57,23 +57,12 @@ class CategoriesPage(Shared):
 
     def setEvent(self, eventName):
         eventName = str(eventName)
-        self.model = DirectoryModel(self, eventName)
-        self.currentEventLabel.setText('Set up categories in ' + eventName + ':')
-        self.view.setModel(self.model)
-        for col in range(1, 4):
-            self.view.hideColumn(col)
-        self.view.setHeaderHidden(True)
-        currentEventPath = self.filesystem.joinPath([
-                self.config.eventsDir(),
-                eventName,
-                ])
-        self.model.setRootPath(currentEventPath)
-        currentPathIndex = self.model.index(currentEventPath)
-
-        self.view.setRootIndex(currentPathIndex)
+        self.currentEventLabel.setText('Set up categories in '
+                                       + eventName + ':')
         self.addCatButton.setEnabled(True)
         self.removeCatButton.setEnabled(True)
-        
+        self.view.setEvent(eventName)
+
     def addItem(self, categoryName):
         selectedIndex = self.getSelectedIndex()
         if not selectedIndex:
