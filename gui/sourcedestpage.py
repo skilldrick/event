@@ -3,6 +3,7 @@ from PyQt4 import QtCore, QtGui
 from featurebroker import *
 import functions
 from .shared import Shared
+from .categorywidget import CategoryWidget
 
 class SourceDestWidget(Shared):
     def __init__(self, parent=None):
@@ -33,12 +34,15 @@ class SourceWidget(SourceDestWidget):
         SourceDestWidget.__init__(self)
 
 
-class DestinationWidget(SourceDestWidget):
-    model = RequiredFeature('SourceList')
-
+class DestinationWidget(CategoryWidget):
+    """
+    At the moment DestinationWidget is just a CategoryWidget.
+    Is it necessary to have two CategoryWidgets? Could we
+    combine the function of categoriespage with that of
+    sourcedestpage? Ask Kazz.
+    """
     def __init__(self, parent=None):
-        SourceDestWidget.__init__(self)
-    
+        CategoryWidget.__init__(self)
     
 
 class SourceDestPage(QtGui.QWidget):
@@ -46,7 +50,7 @@ class SourceDestPage(QtGui.QWidget):
     sourceList = RequiredFeature('SourceList')
     previousPage = QtCore.pyqtSignal()
     nextPage = QtCore.pyqtSignal()
-
+    setEvent = QtCore.pyqtSignal(str)
 
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -56,6 +60,7 @@ class SourceDestPage(QtGui.QWidget):
         label = QtGui.QLabel('Select source and destination for import:')
         self.sourceWidget = SourceWidget()
         self.destinationWidget = DestinationWidget()
+        self.setEvent.connect(self.destinationWidget.setEvent)
         self.backButton = QtGui.QPushButton('Back')
         self.backButton.clicked.connect(self.previousPage)
 

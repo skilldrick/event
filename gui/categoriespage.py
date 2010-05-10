@@ -17,18 +17,11 @@ class DeselectableTreeView(QtGui.QTreeView):
 
 
 class CategoriesPage(QtGui.QWidget):
-    config = RequiredFeature('Config')
-    filesystem = RequiredFeature('Filesystem')
-    itemStrings = {'singularCaps': 'Category',
-                   'singularLower': 'category',
-                   'pluralCaps': 'Categories',
-                   'pluralLower': 'categories',
-                   }
     previousPage = QtCore.pyqtSignal()
     nextPage = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
-        Shared.__init__(self, parent)
+        QtGui.QWidget.__init__(self, parent)
         self.setupLayout()
 
     def setupLayout(self):
@@ -36,9 +29,9 @@ class CategoriesPage(QtGui.QWidget):
         self.backButton = QtGui.QPushButton('Back')
         self.backButton.clicked.connect(self.previousPage)
         self.addCatButton = QtGui.QPushButton('Add category')
-        self.addCatButton.clicked.connect(self.getItem)
+        self.addCatButton.clicked.connect(self.categoryWidget.getItem)
         self.removeCatButton = QtGui.QPushButton('Remove category')
-        self.removeCatButton.clicked.connect(self.removeItem)
+        self.removeCatButton.clicked.connect(self.categoryWidget.removeItem)
         self.continueButton = QtGui.QPushButton('Continue')
         self.continueButton.clicked.connect(self.nextPage)
 
@@ -46,7 +39,7 @@ class CategoriesPage(QtGui.QWidget):
         
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(self.currentEventLabel)
-        vbox.addWidget(self.view)
+        vbox.addWidget(self.categoryWidget)
         hbox = QtGui.QHBoxLayout()
         hbox.addWidget(self.backButton)
         hbox.addWidget(self.removeCatButton)
@@ -61,7 +54,7 @@ class CategoriesPage(QtGui.QWidget):
                                        + eventName + ':')
         self.addCatButton.setEnabled(True)
         self.removeCatButton.setEnabled(True)
-        self.view.setEvent(eventName)
+        self.categoryWidget.setEvent(eventName)
 
     def addItem(self, categoryName):
         selectedIndex = self.getSelectedIndex()

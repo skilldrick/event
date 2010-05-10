@@ -16,10 +16,26 @@ class DeselectableTreeView(QtGui.QTreeView):
 
 
 class CategoryWidget(Shared):
+    config = RequiredFeature('Config')
+    filesystem = RequiredFeature('Filesystem')
+    itemStrings = {'singularCaps': 'Category',
+                   'singularLower': 'category',
+                   'pluralCaps': 'Categories',
+                   'pluralLower': 'categories',
+                   }
+
     def __init__(self, parent=None):
         Shared.__init__(self, parent)
+        self.setupLayout()
+
+    def setupLayout(self):
+        self.view = DeselectableTreeView()
+        vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(self.view)
+        self.setLayout(vbox)
         
     def setEvent(self, eventName):
+        eventName = str(eventName)
         self.model = DirectoryModel(self, eventName)
         self.view.setModel(self.model)
         for col in range(1, 4):
