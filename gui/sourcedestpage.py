@@ -35,12 +35,6 @@ class SourceWidget(SourceDestWidget):
 
 
 class DestinationWidget(CategoryWidget):
-    """
-    At the moment DestinationWidget is just a CategoryWidget.
-    Is it necessary to have two CategoryWidgets? Could we
-    combine the function of categoriespage with that of
-    sourcedestpage? Ask Kazz.
-    """
     def __init__(self, parent=None):
         CategoryWidget.__init__(self)
     

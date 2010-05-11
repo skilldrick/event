@@ -26,7 +26,7 @@ class SourceList(QtGui.QStringListModel):
 
         if role == QtCore.Qt.DisplayRole:
             return self.stringList()[index.row()]
-        elif role == QtCore.Qt.UserRole:
+        elif role == QtCore.Qt.ToolTipRole or role == QtCore.Qt.UserRole:
             return self.locationList()[index.row()]
         else:
             return QtCore.QVariant()

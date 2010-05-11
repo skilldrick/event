@@ -50,5 +50,14 @@ class CategoryWidget(Shared):
 
         self.view.setRootIndex(currentPathIndex)
         
+    def addItem(self, categoryName):
+        selectedIndex = self.getSelectedIndex()
+        if not selectedIndex:
+            selectedIndex = self.view.rootIndex()
+        success = self.model.addItem(selectedIndex, categoryName)
+        if not success:
+            print 'addItem failed'
+
+
 
     
