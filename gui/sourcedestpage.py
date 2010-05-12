@@ -5,7 +5,9 @@ import functions
 from .shared import Shared
 from .categorywidget import CategoryWidget
 
-class SourceDestWidget(Shared):
+class SourceWidget(Shared):
+    model = RequiredFeature('SourceList')
+    
     def __init__(self, parent=None):
         Shared.__init__(self, parent)
         self.setupLayout()
@@ -13,31 +15,35 @@ class SourceDestWidget(Shared):
     def setupLayout(self):
         self.view = QtGui.QListView()
         self.view.setModel(self.model)
-        temp = QtGui.QPushButton('temp')
-        temp.clicked.connect(self.printLocation)
-        
+        self.addButton = QtGui.QPushButton('Add source')
+        self.addButton.clicked.connect(self.getItem)
+        self.removeButton = QtGui.QPushButton('Remove source')
+        self.removeButton.clicked.connect(self.removeItem)
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(self.view)
-        vbox.addWidget(temp)
-
+        vbox.addWidget(self.addButton)
+        vbox.addWidget(self.removeButton)
         self.setLayout(vbox)
+
+    def getItem(self):
+        #get name, then path.
+        #if name is len() == 0, then don't bother getting path.
+        #qtText = QtGui.QInputDialog.getText(self, title, body)[0]
+        #text = str(qtText)
+        #text = str(qtText)
+        #if len(text) > 0:
+            #self.addItem(text)
+
+        pass
+
+    def addItem(self):
+        #self.model.addItem(item)
+        pass
 
     def printLocation(self):
         index = self.getSelectedIndex()
         print self.model.data(index, QtCore.Qt.UserRole)
         
-
-class SourceWidget(SourceDestWidget):
-    model = RequiredFeature('SourceList')
-
-    def __init__(self, parent=None):
-        SourceDestWidget.__init__(self)
-
-
-class DestinationWidget(CategoryWidget):
-    def __init__(self, parent=None):
-        CategoryWidget.__init__(self)
-    
 
 class SourceDestPage(QtGui.QWidget):
     config = RequiredFeature('Config')
@@ -53,7 +59,7 @@ class SourceDestPage(QtGui.QWidget):
     def setupLayout(self):
         label = QtGui.QLabel('Select source and destination for import:')
         self.sourceWidget = SourceWidget()
-        self.destinationWidget = DestinationWidget()
+        self.destinationWidget = CategoryWidget()
         self.setEvent.connect(self.destinationWidget.setEvent)
         self.backButton = QtGui.QPushButton('Back')
         self.backButton.clicked.connect(self.previousPage)

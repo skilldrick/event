@@ -30,8 +30,14 @@ class CategoryWidget(Shared):
 
     def setupLayout(self):
         self.view = DeselectableTreeView()
+        self.addButton = QtGui.QPushButton('Add category')
+        self.addButton.clicked.connect(self.getItem)
+        self.removeButton = QtGui.QPushButton('Remove category')
+        self.removeButton.clicked.connect(self.removeItem)
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(self.view)
+        vbox.addWidget(self.addButton)
+        vbox.addWidget(self.removeButton)
         self.setLayout(vbox)
         
     def setEvent(self, eventName):
