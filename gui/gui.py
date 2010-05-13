@@ -9,7 +9,7 @@ from config import Config
 from eventlist import EventList, EventError
 from categories import Categories
 from filesystem import Filesystem
-from sourcedestination import SourceList
+from sourcelist import SourceList
 from featurebroker import *
 from .eventspage import EventsPage
 from .sourcedestpage import SourceDestPage

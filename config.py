@@ -71,8 +71,11 @@ class Config:
     def getEvent(self):
         return self._event
 
-    def getSourceList(self):
+    def addSource(self, path, name):
+        print path, name
+
+    def getSourceNameList(self):
         return self.configFile.getData('sourcelist', 'name')
 
-    def getLocationList(self):
+    def getSourceLocationList(self):
         return self.configFile.getData('sourcelist', 'location')

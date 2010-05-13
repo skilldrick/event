@@ -26,19 +26,21 @@ class SourceWidget(Shared):
         self.setLayout(vbox)
 
     def getItem(self):
-        #get name, then path.
-        #if name is len() == 0, then don't bother getting path.
-        #qtText = QtGui.QInputDialog.getText(self, title, body)[0]
-        #text = str(qtText)
-        #text = str(qtText)
-        #if len(text) > 0:
-            #self.addItem(text)
+        #qt prefix means qString
+        title = 'New source'
+        path = QtGui.QFileDialog.getExistingDirectory(self, title)
+        path = str(path)
+        if len(path) == 0: #no directory selected
+            return
 
-        pass
+        body = 'Please give this source a name:'
+        name = QtGui.QInputDialog.getText(self, title, body)[0]
+        name = str(name)
+        if len(name) > 0:
+            self.addItem(path, name)
 
-    def addItem(self):
-        #self.model.addItem(item)
-        pass
+    def addItem(self, path, name):
+        self.model.addSource(path, name)
 
     def printLocation(self):
         index = self.getSelectedIndex()

@@ -8,9 +8,12 @@ class SourceList(QtGui.QStringListModel):
     
     def __init__(self):
         QtGui.QStringListModel.__init__(self)
-        self.setStringList(self.config.getSourceList())
-        self.setLocationList(self.config.getLocationList())
+        self.loadSources()
 
+    def loadSources(self):
+        self.setStringList(self.config.getSourceNameList())
+        self.setLocationList(self.config.getSourceLocationList())
+        
     def setLocationList(self, locationList):
         self._locationList = locationList
 
@@ -30,3 +33,8 @@ class SourceList(QtGui.QStringListModel):
             return self.locationList()[index.row()]
         else:
             return QtCore.QVariant()
+
+    def addSource(self, path, name):
+        self.config.addSource(path, name)
+        self.loadSources()
+        
