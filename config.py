@@ -14,7 +14,7 @@ class ConfigFile:
             self.initConfigXml()
             self.dom = MD.parse(self.configPath())
 
-    def removeItem(self):
+    def removeItem(self): #this is an experiment - not meant to be used
         items = self.dom.getElementsByTagName('item')
         sourcelist = self.dom.getElementsByTagName('sourcelist')[0]
         print self.dom.toprettyxml()
@@ -29,12 +29,25 @@ class ConfigFile:
             newElement.appendChild(text)
         return newElement
 
+    def addSource(self, path, name):
+        sourceList = self.dom.getElementsByTagName('sourcelist')[0]
+        newSource = self.addSubElement(sourceList, 'item')
+        self.addSubElement(newSource, 'name', name)
+        self.addSubElement(newSource, 'location', path)
+        print sourceList.toprettyxml()
+        self.writeDomToFile()
+
     def getData(self, parentTag, childTag):
         ret = []
         for item in self.dom.getElementsByTagName(parentTag)[0].childNodes:
             childNode = item.getElementsByTagName(childTag)[0]
             ret.append(childNode.firstChild.toxml())
         return ret
+
+    def writeDomToFile(self):
+        #Implement this!!!
+        #use the code from initConfigXml(), then replace it with this
+        pass
 
     def initConfigXml(self):
         self.dom = MD.parseString('<config />')
@@ -72,7 +85,7 @@ class Config:
         return self._event
 
     def addSource(self, path, name):
-        print path, name
+        self.configFile.addSource(path, name)
 
     def getSourceNameList(self):
         return self.configFile.getData('sourcelist', 'name')
