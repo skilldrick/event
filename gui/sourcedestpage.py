@@ -1,9 +1,10 @@
 from PyQt4 import QtCore, QtGui
 
 from featurebroker import *
+from directorymodel import DirectoryModel
 import functions
 from .shared import Shared
-from .categorywidget import CategoryWidget
+
 
 class SourceWidget(Shared):
     model = RequiredFeature('SourceList')
@@ -32,7 +33,6 @@ class SourceWidget(Shared):
         self.setLayout(vbox)
 
     def getItem(self):
-        #qt prefix means qString
         title = 'New source'
         path = QtGui.QFileDialog.getExistingDirectory(self, title)
         path = str(path)
@@ -53,6 +53,64 @@ class SourceWidget(Shared):
         print self.model.data(index, QtCore.Qt.UserRole)
         
 
+class DeselectableTreeView(QtGui.QTreeView):
+    def mousePressEvent(self, event):
+        """When the TreeView is clicked, the selection is cleared.
+        If an item is clicked, QTreeView.mousePressEvent() selects it"""
+        self.clearSelection()
+        QtGui.QTreeView.mousePressEvent(self, event)
+
+
+class CategoryWidget(Shared):
+    config = RequiredFeature('Config')
+    filesystem = RequiredFeature('Filesystem')
+    itemStrings = {'singularCaps': 'Category',
+                   'singularLower': 'category',
+                   'pluralCaps': 'Categories',
+                   'pluralLower': 'categories',
+                   }
+
+    def __init__(self, parent=None):
+        Shared.__init__(self, parent)
+        self.setupLayout()
+
+    def setupLayout(self):
+        self.view = DeselectableTreeView()
+        self.addButton = QtGui.QPushButton('Add category')
+        self.addButton.clicked.connect(self.getItem)
+        self.removeButton = QtGui.QPushButton('Remove category')
+        self.removeButton.clicked.connect(self.removeItem)
+        vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(self.view)
+        vbox.addWidget(self.addButton)
+        vbox.addWidget(self.removeButton)
+        self.setLayout(vbox)
+        
+    def setEvent(self, eventName):
+        eventName = str(eventName)
+        self.model = DirectoryModel(self, eventName)
+        self.view.setModel(self.model)
+        for col in range(1, 4):
+            self.view.hideColumn(col)
+        self.view.setHeaderHidden(True)
+        currentEventPath = self.filesystem.joinPath([
+                self.config.eventsDir(),
+                eventName,
+                ])
+        self.model.setRootPath(currentEventPath)
+        currentPathIndex = self.model.index(currentEventPath)
+
+        self.view.setRootIndex(currentPathIndex)
+        
+    def addItem(self, categoryName):
+        selectedIndex = self.getSelectedIndex()
+        if not selectedIndex:
+            selectedIndex = self.view.rootIndex()
+        success = self.model.addItem(selectedIndex, categoryName)
+        if not success:
+            print 'addItem failed'
+
+        
 class SourceDestPage(QtGui.QWidget):
     config = RequiredFeature('Config')
     sourceList = RequiredFeature('SourceList')
@@ -79,8 +137,14 @@ class SourceDestPage(QtGui.QWidget):
         grid.addWidget(self.sourceWidget, 1, 0)
         grid.addWidget(self.destinationWidget, 1, 1)
         grid.addWidget(self.backButton, 3, 0)
+        grid.addWidget(self.importButton, 3, 1)
 
         self.setLayout(grid)
 
     def importImages(self):
-        pass
+        sourceIndex = self.sourceWidget.getSelectedIndex()
+        destinationIndex = self.destinationWidget.getSelectedIndex()
+        if sourceIndex and destinationIndex:
+            self.config.sourceIndex = sourceIndex
+            self.config.destinationIndex = destinationIndex
+            self.nextPage.emit()

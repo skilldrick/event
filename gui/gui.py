@@ -23,6 +23,7 @@ class Stacked(QtGui.QStackedWidget):
         self.widget1.nextPage.connect(self.nextPage)
         self.widget1.setEvent.connect(self.widget3.setEvent)
         self.widget3.previousPage.connect(self.previousPage)
+        self.widget3.nextPage.connect(self.nextPage)
         self.widget4 = MyWidget('imagesdir/kitten-portrait.jpg')
         self.addWidget(self.widget1)
         self.addWidget(self.widget3)
