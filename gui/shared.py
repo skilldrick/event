@@ -35,10 +35,13 @@ class Shared(QtGui.QWidget):
     def itemRemoveFailed(self):
         title = 'Cannot remove {item}'.format(
             item=self.itemStrings['singularLower'])
-        message = 'This {item} cannot be removed.\n'.format(
-            item=self.itemStrings['singularLower'])
-        message += 'Only empty {items} can be removed.'.format(
-            items=self.itemStrings['pluralLower'])
+        try:
+            message = self.itemStrings['itemRemoveFailed']
+        except KeyError:
+            message = 'This {item} cannot be removed.\n'.format(
+                item=self.itemStrings['singularLower'])
+            message += 'Only empty {items} can be removed.'.format(
+                items=self.itemStrings['pluralLower'])
         QtGui.QMessageBox.warning(self, title, message)
 
     def getSelectedIndex(self):

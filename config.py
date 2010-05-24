@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 import xml.dom.minidom as MD
+from xml.parsers.expat import ExpatError
 
 class ConfigFile:
     _configPath = 'config.xml'
@@ -10,7 +11,8 @@ class ConfigFile:
     def __init__(self):
         try:
             self.dom = MD.parse(self.configPath())
-        except IOError: # No config file so initialise new one
+        except (IOError, ExpatError): # No config file so initialise new one
+            print 'Error reading/parsing', self.configPath()
             self.initConfigXml()
             self.dom = MD.parse(self.configPath())
 
@@ -34,8 +36,22 @@ class ConfigFile:
         newSource = self.addSubElement(sourceList, 'item')
         self.addSubElement(newSource, 'name', name)
         self.addSubElement(newSource, 'location', path)
-        print sourceList.toprettyxml()
         self.writeDomToFile()
+
+    def removeSource(self, name):
+        success = True
+        sourceList = self.dom.getElementsByTagName('sourcelist')[0]
+        for item in sourceList.childNodes:
+            itemName = item.getElementsByTagName('name')[0].\
+                firstChild.nodeValue
+            if name == itemName:
+                sourceList.removeChild(item)
+                break
+        else: #loop ran to completion without finding item
+            success = False
+
+        self.writeDomToFile()
+        return success
 
     def getData(self, parentTag, childTag):
         ret = []
@@ -45,9 +61,11 @@ class ConfigFile:
         return ret
 
     def writeDomToFile(self):
-        #Implement this!!!
+        file = open(self.configPath(), 'w')
+        root = self.dom.childNodes[0]
+        root.writexml(file)
+        file.close()
         #use the code from initConfigXml(), then replace it with this
-        pass
 
     def initConfigXml(self):
         self.dom = MD.parseString('<config />')
@@ -86,6 +104,9 @@ class Config:
 
     def addSource(self, path, name):
         self.configFile.addSource(path, name)
+
+    def removeSource(self, name):
+        return self.configFile.removeSource(name)
 
     def getSourceNameList(self):
         return self.configFile.getData('sourcelist', 'name')

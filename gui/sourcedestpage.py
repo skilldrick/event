@@ -7,6 +7,12 @@ from .categorywidget import CategoryWidget
 
 class SourceWidget(Shared):
     model = RequiredFeature('SourceList')
+    itemStrings = {'itemRemoveFailed':'Could not remove this source.',
+                   'singularCaps': 'Source',
+                   'singularLower': 'source',
+                   'pluralCaps': 'Sources',
+                   'pluralLower': 'sources',
+                   }
     
     def __init__(self, parent=None):
         Shared.__init__(self, parent)
@@ -40,7 +46,7 @@ class SourceWidget(Shared):
             self.addItem(path, name)
 
     def addItem(self, path, name):
-        self.model.addSource(path, name)
+        self.model.addItem(path, name)
 
     def printLocation(self):
         index = self.getSelectedIndex()
@@ -65,6 +71,8 @@ class SourceDestPage(QtGui.QWidget):
         self.setEvent.connect(self.destinationWidget.setEvent)
         self.backButton = QtGui.QPushButton('Back')
         self.backButton.clicked.connect(self.previousPage)
+        self.importButton = QtGui.QPushButton('Import')
+        self.importButton.clicked.connect(self.importImages)
 
         grid = QtGui.QGridLayout()
         grid.addWidget(label, 0, 0, 1, 2)
@@ -74,3 +82,5 @@ class SourceDestPage(QtGui.QWidget):
 
         self.setLayout(grid)
 
+    def importImages(self):
+        pass

@@ -34,7 +34,12 @@ class SourceList(QtGui.QStringListModel):
         else:
             return QtCore.QVariant()
 
-    def addSource(self, path, name):
+    def addItem(self, path, name):
         self.config.addSource(path, name)
         self.loadSources()
-        
+
+    def removeItem(self, itemIndex):
+        name = self.data(itemIndex)
+        success = self.config.removeSource(name)
+        self.loadSources()
+        return success
