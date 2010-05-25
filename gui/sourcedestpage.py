@@ -48,9 +48,10 @@ class SourceWidget(Shared):
     def addItem(self, path, name):
         self.model.addItem(path, name)
 
-    def printLocation(self):
+    def getSelectedPath(self):
         index = self.getSelectedIndex()
-        print self.model.data(index, QtCore.Qt.UserRole)
+        if index:
+            return self.model.data(index, QtCore.Qt.UserRole)
         
 
 class DeselectableTreeView(QtGui.QTreeView):
@@ -99,7 +100,6 @@ class CategoryWidget(Shared):
                 ])
         self.model.setRootPath(currentEventPath)
         currentPathIndex = self.model.index(currentEventPath)
-
         self.view.setRootIndex(currentPathIndex)
         
     def addItem(self, categoryName):
@@ -109,6 +109,13 @@ class CategoryWidget(Shared):
         success = self.model.addItem(selectedIndex, categoryName)
         if not success:
             print 'addItem failed'
+
+    def getSelectedPath(self):
+        index = self.getSelectedIndex()
+        if index:
+            qVariant = self.model.data(index,
+                                       QtGui.QFileSystemModel.FilePathRole)
+            return qVariant.toString()
 
         
 class SourceDestPage(QtGui.QWidget):
@@ -142,9 +149,20 @@ class SourceDestPage(QtGui.QWidget):
         self.setLayout(grid)
 
     def importImages(self):
-        sourceIndex = self.sourceWidget.getSelectedIndex()
-        destinationIndex = self.destinationWidget.getSelectedIndex()
-        if sourceIndex and destinationIndex:
-            self.config.sourceIndex = sourceIndex
-            self.config.destinationIndex = destinationIndex
+        source = self.sourceWidget.getSelectedPath()
+        destination = self.destinationWidget.getSelectedPath()
+        if source and destination:
+            self.config.source = source
+            self.config.destination = destination
+            #source and destination are path strings.
+            
+            #now config has source and dest index we can actually
+            #import the images. Should assert in image importer
+            #that source and dest indexes are valid. Also, indexes
+            #are only meaningful with a model - just pass data?
             self.nextPage.emit()
+        else:
+            title = 'Select source and destination'
+            message = 'Please select a source and destination'
+            message += ' for image import.'
+            QtGui.QMessageBox.information(self, title, message)
