@@ -124,6 +124,7 @@ class SourceDestPage(QtGui.QWidget):
     previousPage = QtCore.pyqtSignal()
     nextPage = QtCore.pyqtSignal()
     setEvent = QtCore.pyqtSignal(str)
+    setSourceDest = QtCore.pyqtSignal(str, str)
 
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -152,10 +153,7 @@ class SourceDestPage(QtGui.QWidget):
         source = self.sourceWidget.getSelectedPath()
         destination = self.destinationWidget.getSelectedPath()
         if source and destination:
-            self.config.source = source
-            self.config.destination = destination
-            #source and destination are path strings.
-            
+            self.setSourceDest.emit(source, destination)
             #now config has source and dest index we can actually
             #import the images. Should assert in image importer
             #that source and dest indexes are valid. Also, indexes

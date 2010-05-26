@@ -13,21 +13,24 @@ from sourcelist import SourceList
 from featurebroker import *
 from .eventspage import EventsPage
 from .sourcedestpage import SourceDestPage
+from .importpage import ImportPage
 
 
 class Stacked(QtGui.QStackedWidget):
     def __init__(self, parent=None):
         QtGui.QStackedWidget.__init__(self, parent)
         self.widget1 = EventsPage()
-        self.widget3 = SourceDestPage()
+        self.widget2 = SourceDestPage()
+        self.widget3 = ImportPage()
+        
         self.widget1.nextPage.connect(self.nextPage)
-        self.widget1.setEvent.connect(self.widget3.setEvent)
-        self.widget3.previousPage.connect(self.previousPage)
-        self.widget3.nextPage.connect(self.nextPage)
-        self.widget4 = MyWidget('imagesdir/kitten-portrait.jpg')
+        self.widget1.setEvent.connect(self.widget2.setEvent)
+        self.widget2.previousPage.connect(self.previousPage)
+        self.widget2.nextPage.connect(self.nextPage)
+        self.widget2.setSourceDest.connect(self.widget3.setSourceDest)
         self.addWidget(self.widget1)
+        self.addWidget(self.widget2)
         self.addWidget(self.widget3)
-        self.addWidget(self.widget4)
 
     def nextPage(self):
         self.setCurrentIndex(self.currentIndex() + 1)
