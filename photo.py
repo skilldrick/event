@@ -21,7 +21,7 @@ class Photo:
 
     def isRotated(self):
         exif = self.getExif()
-        if exif['Orientation'] == 6:
+        if exif and exif['Orientation'] == 6:
             return True
         return False
 
@@ -33,7 +33,7 @@ class Photo:
                 decoded = TAGS.get(tag, tag)
                 ret[decoded] = value
         else:
-            ret['Orientation'] = 1
+            ret = None
         return ret
 
 

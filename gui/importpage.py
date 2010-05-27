@@ -5,6 +5,7 @@ from featurebroker import *
 class ImportPage(QtGui.QWidget):
     config = RequiredFeature('Config')
     filesystem = RequiredFeature('Filesystem')
+    importer = RequiredFeature('Importer')
     
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -21,4 +22,5 @@ class ImportPage(QtGui.QWidget):
             'Source is not a valid directory'
         assert self.filesystem.checkDirExists(destination), \
             'Destination is not a valid directory'
-        self.label.setText(source + " " + destination)
+        self.importer.setLocations(source, destination)
+        self.importer.getPhotoList()

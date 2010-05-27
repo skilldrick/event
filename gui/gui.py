@@ -10,6 +10,7 @@ from eventlist import EventList, EventError
 from categories import Categories
 from filesystem import Filesystem
 from sourcelist import SourceList
+from importer import Importer
 from featurebroker import *
 from .eventspage import EventsPage
 from .sourcedestpage import SourceDestPage
@@ -80,6 +81,7 @@ def main():
     features.provide('Filesystem', Filesystem)
     features.provide('Categories', Categories)
     features.provide('SourceList', SourceList)
+    features.provide('Importer', Importer)
     masterWidget = MasterWidget()
     masterWidget.show()
     sys.exit(app.exec_())

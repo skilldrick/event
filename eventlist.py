@@ -47,6 +47,9 @@ class EventList:
         
             
 class MockFilesystem (Filesystem):
+    def __init__(self):
+        print 'Initialising MockFilesystem in eventlist'
+    
     def listDirs(self, root):
         return ['My event', 'event2', 'another event']
 

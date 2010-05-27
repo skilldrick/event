@@ -4,6 +4,7 @@ import eventlist
 import filesystem
 import photo
 import categories
+import importer
 
 
 def main():
@@ -12,6 +13,7 @@ def main():
     suites.append(filesystem.suite())
     suites.append(photo.suite())
     suites.append(categories.suite())
+    suites.append(importer.suite())
     allTests = unittest.TestSuite(suites)
     runner = unittest.TextTestRunner()
     runner.run(allTests)
