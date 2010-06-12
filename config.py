@@ -1,18 +1,32 @@
 import xml.etree.ElementTree as ET
 import xml.dom.minidom as MD
 from xml.parsers.expat import ExpatError
+import unittest
+
+from filesystem import Filesystem
 
 class ConfigFile:
     _configPath = 'config.xml'
-    
+
+    initSources = [ #these are used to initialise configfile
+        {'name':'Memory card', 'location':'D:/'},
+        {'name':'Temp folder', 'location':'C:/Photos'}
+        ]
+
     def configPath(self):
         return self._configPath
 
-    def __init__(self):
+    def setConfigPath(self, path):
+        self._configPath = path
+
+    def __init__(self, path=None):
+        if path:
+            self.setConfigPath(path)
         try:
             self.dom = MD.parse(self.configPath())
         except (IOError, ExpatError): # No config file so initialise new one
-            print 'Error reading/parsing', self.configPath()
+            #print 'Error reading/parsing', self.configPath()
+            #print 'Initialising new config file:', self.configPath()
             self.initConfigXml()
             self.dom = MD.parse(self.configPath())
 
@@ -65,12 +79,7 @@ class ConfigFile:
         root = self.dom.childNodes[0]
         sourcelist = self.addSubElement(root, 'sourcelist')
 
-        sources = [
-            {'name':'Memory card', 'location':'D:/'},
-            {'name':'Temp folder', 'location':'C:/Photos'}
-            ]
-
-        for item in sources:
+        for item in self.initSources:
             newItem = self.addSubElement(sourcelist, 'item')
             self.addSubElement(newItem, 'name', item['name'])
             self.addSubElement(newItem, 'location', item['location'])
@@ -78,6 +87,48 @@ class ConfigFile:
         file = open(self.configPath(), 'w')
         root.writexml(file)
         file.close()
+
+
+class ConfigFileTests(unittest.TestCase):
+    testConfigPath = 'testconfig.xml'
+
+    def setUp(self):
+        self.configFile = ConfigFile(self.testConfigPath)
+
+    def tearDown(self):
+        Filesystem().removeFile(self.testConfigPath)
+        
+    def assertListsEqual(self, list1, list2):
+        for item1, item2 in zip(list1, list2):
+            self.assertEqual(item1, item2)
+
+    def getListFromInitSources(self, key):
+        #initSources is a list of sources for initialising
+        #the config file. This function produces a list of
+        #either the name or the location of each source.
+        ret = []
+        for item in self.configFile.initSources:
+            ret.append(item[key])
+        return ret
+
+    def testGetNames(self):
+        sourceNames = self.configFile.getData('sourcelist', 'name')
+        self.assertListsEqual(sourceNames,
+                              self.getListFromInitSources('name'))
+
+    def testGetLocations(self):
+        locations = self.configFile.getData('sourcelist', 'location')
+        self.assertListsEqual(locations,
+                              self.getListFromInitSources('location'))
+    
+
+
+def suite():
+    testSuite = unittest.makeSuite(ConfigFileTests)
+    return testSuite
+
+if __name__ == '__main__':
+    unittest.TextTestRunner().run(suite())
 
 
 class Config:
