@@ -17,11 +17,5 @@ class ImportPage(QtGui.QWidget):
         self.setLayout(vbox)
 
     def setSourceDest(self, source, destination):
-        """
-        assert self.filesystem.checkDirExists(source), \
-            'Source is not a valid directory'
-        assert self.filesystem.checkDirExists(destination), \
-            'Destination is not a valid directory'
-            """
         self.importer.setLocations(source, destination)
         self.importer.getPhotoList()

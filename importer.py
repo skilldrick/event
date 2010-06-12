@@ -1,6 +1,7 @@
 import unittest
 
 from filesystem import Filesystem
+from mocks import MockFilesystem
 from featurebroker import *
 import os.path
 
@@ -11,9 +12,10 @@ class Importer:
         pass
 
     def setLocations(self, source, destination):
+        assert(self.checkLocationsExist(source, destination))
         self.source = source
         self.destination = destination
-        #print self.filesystem.checkDirExists(destination)
+        
 
     def checkLocationsExist(self, source, destination):
         return self.filesystem.checkDirExists(source)
@@ -27,7 +29,7 @@ class ImporterTests(unittest.TestCase):
     destination = 'events/rugby/boys'
     
     def setUp(self):
-        features.provide('Filesystem', Filesystem)
+        features.provide('Filesystem', MockFilesystem)
         self.importer = Importer()
         self.importer.setLocations(self.source, self.destination)
 
@@ -37,10 +39,6 @@ class ImporterTests(unittest.TestCase):
         self.assertTrue(self.importer.checkLocationsExist(
                 self.source,
                 self.destination))
-
-    def testSanity(self):
-        self.assertTrue(self.importer.checkLocationsExist(self.destination,
-                                                          self.destination))
 
 
     
