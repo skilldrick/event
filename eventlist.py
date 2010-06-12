@@ -3,6 +3,7 @@ import unittest
 from featurebroker import *
 from config import Config
 from filesystem import Filesystem
+from mocks import MockFilesystem
 
 
 
@@ -46,20 +47,6 @@ class EventList:
             raise EventError
         
             
-class MockFilesystem (Filesystem):
-    def __init__(self):
-        print 'Initialising MockFilesystem in eventlist'
-    
-    def listDirs(self, root):
-        return ['My event', 'event2', 'another event']
-
-    def makeDir(self, dirname):
-        if not self.checkValidDir(dirname):
-            raise IOError
-        if not type(dirname) == list:
-            assert False, 'dirname should be list'
-
-
 class EventListTests(unittest.TestCase):
     def setUp(self):
         self.eventList = EventList()

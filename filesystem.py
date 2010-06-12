@@ -7,7 +7,7 @@ class Filesystem:
     forbiddenChars = [':', '*', '?', '"', '<', '>', '|', '\\']
 
     def __init__(self):
-        print 'Initialising Filesystem'
+        pass
     
     def join(f):
         def new_f(self, pathname):
