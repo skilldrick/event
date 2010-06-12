@@ -2,7 +2,6 @@ from PyQt4 import QtCore, QtGui
 
 from featurebroker import *
 import functions
-from categories import Categories
 
 class Shared(QtGui.QWidget):
     config = RequiredFeature('Config', hasMethods('eventsDir'))

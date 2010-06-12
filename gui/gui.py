@@ -7,7 +7,6 @@ import unittest
 
 from config import Config
 from eventlist import EventList, EventError
-from categories import Categories
 from filesystem import Filesystem
 from sourcelist import SourceList
 from importer import Importer
@@ -79,7 +78,6 @@ def main():
     features.provide('Config', Config)
     features.provide('EventList', EventList)
     features.provide('Filesystem', Filesystem)
-    features.provide('Categories', Categories)
     features.provide('SourceList', SourceList)
     features.provide('Importer', Importer)
     masterWidget = MasterWidget()

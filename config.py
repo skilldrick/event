@@ -16,13 +16,6 @@ class ConfigFile:
             self.initConfigXml()
             self.dom = MD.parse(self.configPath())
 
-    def removeItem(self): #this is an experiment - not meant to be used
-        items = self.dom.getElementsByTagName('item')
-        sourcelist = self.dom.getElementsByTagName('sourcelist')[0]
-        print self.dom.toprettyxml()
-        sourcelist.removeChild(items[0])
-        print self.dom.toprettyxml()
-
     def addSubElement(self, parent, name, contents=None):
         newElement = self.dom.createElement(name)
         parent.appendChild(newElement)
