@@ -84,10 +84,7 @@ class ConfigFile:
             self.addSubElement(newItem, 'name', item['name'])
             self.addSubElement(newItem, 'location', item['location'])
 
-        file = open(self.configPath(), 'w')
-        root.writexml(file)
-        file.close()
-
+        self.writeDomToFile()
 
 class ConfigFileTests(unittest.TestCase):
     testConfigPath = 'testconfig.xml'
@@ -120,7 +117,15 @@ class ConfigFileTests(unittest.TestCase):
         locations = self.configFile.getData('sourcelist', 'location')
         self.assertListsEqual(locations,
                               self.getListFromInitSources('location'))
-    
+
+    def testAddSource(self):
+        self.configFile.addSource('blah/blah', 'blah')
+        self.assertTrue('blah' in self.configFile.getData('sourcelist', 'name'))
+
+    def testRemoveSource(self):
+        self.configFile.addSource('myah/hah', 'myahhah')
+        self.configFile.removeSource('myahhah')
+        self.assertFalse('myahhah' in self.configFile.getData('sourcelist', 'name'))
 
 
 def suite():
