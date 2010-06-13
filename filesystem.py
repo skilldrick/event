@@ -10,9 +10,12 @@ class Filesystem:
         pass
     
     def join(f):
-        def new_f(self, pathname):
+        def new_f(self, pathname, extraParam=None):
             pathname = self.joinPath(pathname)
-            return f(self, pathname)
+            if extraParam:
+                return f(self, pathname, extraParam)
+            else:
+                return f(self, pathname)
         return new_f
 
     def join2(f):
@@ -41,6 +44,10 @@ class Filesystem:
             raise IOError
         if not self.checkDirExists(dirname):
             os.makedirs(dirname)
+
+    @join
+    def isDir(self, dirname):
+        return os.path.isdir(dirname)
 
     def checkValidDir(self, dirname):
         for char in self.forbiddenChars:
@@ -71,10 +78,14 @@ class Filesystem:
         return os.path.basename(dirname)
 
     @join
-    def listFiles(self, root):
-        filenames = os.listdir(root)
+    def listFiles(self, root, extension=None):
+        filenames = sorted(os.listdir(root)) #sort filelist for testing
         for filename in filenames:
-            yield filename
+            if extension:
+                if filename.endswith(extension):
+                    yield filename
+            else:
+                yield filename
 
     @join2
     def copy(self, source, destination):
@@ -103,6 +114,15 @@ class FilesystemTests(unittest.TestCase):
         self.longDirname = ['testdir', 'newdir']
         self.filesystem = Filesystem()
         self.filesystem.makeDir(self.root)
+
+    def tearDown(self):
+        if self.filesystem.checkDirExists(self.root):
+            for filename in self.filesystem.listFiles(self.root):
+                if self.filesystem.isDir([self.root, filename]):
+                    self.filesystem.removeDir([self.root, filename])
+                else:
+                    self.filesystem.removeFile([self.root, filename])
+            self.filesystem.removeDir(self.root)
 
     def testGetBasename(self):
         self.assertEqual(self.filesystem.getBasename(self.longDirname),
@@ -185,16 +205,34 @@ class FilesystemTests(unittest.TestCase):
 
     def testListFiles(self):
         filenames = ['test1', 'test2', 'test3']
+        self.makeFiles(filenames)
+        filelist = self.filesystem.listFiles(self.root)
+        for file1, file2 in zip(filenames, filelist):
+            self.assertEqual(file1, file2)
+        self.removeFiles(filenames)
+
+    def makeFiles(self, filenames):
         filenamepaths = [os.path.join(self.root, filename)
                          for filename in filenames]
         for filenamepath in filenamepaths:
             f = open(filenamepath, 'w')
             f.close()
-        filelist = self.filesystem.listFiles(self.root)
-        for file1, file2 in zip(filenames, filelist):
-            self.assertEqual(file1, file2)
+
+    def removeFiles(self, filenames):
+        filenamepaths = [os.path.join(self.root, filename)
+                         for filename in filenames]
         for filenamepath in filenamepaths:
             os.remove(filenamepath)
+
+    def testListJpegs(self):
+        filenames = ['test1.jpg', 'test2.jpeg', 'test3.JPG', 'test.png']
+        validFilenames = filenames[:3]
+        self.makeFiles(filenames)
+        filelist = self.filesystem.listFiles(self.root,
+                                             ('jpg', 'jpeg', 'JPG', 'JPEG'))
+        for file1, file2 in zip(validFilenames, filelist):
+            self.assertEqual(file1, file2)
+        self.removeFiles(filenames)
 
     def testFileExists(self):
         filename = ['imagesdir', 'kitten.jpg']
