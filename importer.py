@@ -9,8 +9,8 @@ class Importer:
     filesystem = RequiredFeature('Filesystem')
 
     pictures = [
-        ('imagesdir/DSC_0004.JPG', 'landscape', False),
-        ('imagesdir/DSC_0009.JPG', 'portrait', False),
+        ('imagesdir/DSC_0004.JPG', False, False),
+        ('imagesdir/DSC_0009.JPG', True, False),
         ]
 
     index = 0

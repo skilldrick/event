@@ -1,4 +1,5 @@
 from PyQt4 import QtCore, QtGui
+import math
 
 from featurebroker import *
 
@@ -12,9 +13,8 @@ class ImportPage(QtGui.QWidget):
         self.setupLayout()
 
     def setupLayout(self):
-        self.label = QtGui.QLabel('hello')
         self.vbox = QtGui.QVBoxLayout()
-        self.vbox.addWidget(self.label)
+        #use a QScrollArea here.
         self.setLayout(self.vbox)
 
     def setSourceDest(self, source, destination):
@@ -30,15 +30,21 @@ class ImportPage(QtGui.QWidget):
         
     
 class PhotoListWidget(QtGui.QWidget):
-    def __init__(self, path, parent=None):
+    def __init__(self, pic, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        self.imagePath = path
+        self.imagePath = pic[0]
+        self.rotation = pic[1]
         self.setupLayout()
 
     def setupLayout(self):
-        pixmap = QtGui.QPixmap(self.imagePath)
+        pixmap = QtGui.QPixmap(self.imagePath).scaledToHeight(100,
+                                                              QtCore.Qt.SmoothTransformation)
+        if self.rotation:
+            transform = QtGui.QTransform().rotate(90)
+            pixmap = pixmap.transformed(transform)
         label = QtGui.QLabel('', self)
         label.setPixmap(pixmap)
+        
         hbox = QtGui.QHBoxLayout()
         hbox.addWidget(label)
         self.setLayout(hbox)
