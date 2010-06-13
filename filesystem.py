@@ -87,6 +87,10 @@ class Filesystem:
             else:
                 yield filename
 
+    def listJpegs(self, root):
+        extensions = ('jpg', 'JPG', 'jpeg', 'JPEG')
+        return self.listFiles(root, extensions)
+
     @join2
     def copy(self, source, destination):
         shutil.copy2(source, destination)
@@ -228,8 +232,7 @@ class FilesystemTests(unittest.TestCase):
         filenames = ['test1.jpg', 'test2.jpeg', 'test3.JPG', 'test.png']
         validFilenames = filenames[:3]
         self.makeFiles(filenames)
-        filelist = self.filesystem.listFiles(self.root,
-                                             ('jpg', 'jpeg', 'JPG', 'JPEG'))
+        filelist = self.filesystem.listJpegs(self.root)
         for file1, file2 in zip(validFilenames, filelist):
             self.assertEqual(file1, file2)
         self.removeFiles(filenames)
