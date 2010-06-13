@@ -13,9 +13,20 @@ class ImportPage(QtGui.QWidget):
         self.setupLayout()
 
     def setupLayout(self):
-        self.vbox = QtGui.QVBoxLayout()
-        #use a QScrollArea here.
-        self.setLayout(self.vbox)
+        """
+        scrollArea = QtGui.QScrollArea()
+        self.photoWidgetList = PhotoWidgetList()
+        scrollArea.setWidget(self.photoWidgetList)
+        outerBox = QtGui.QVBoxLayout()
+        outerBox.addWidget(scrollArea)
+        self.setLayout(outerBox)
+        """
+        scrollArea = QtGui.QScrollArea()
+        self.photoWidgetList = PhotoWidgetList()
+        scrollArea.setWidget(self.photoWidgetList)
+        vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(scrollArea)
+        self.setLayout(vbox)
 
     def setSourceDest(self, source, destination):
         self.importer.setLocations(source, destination)
@@ -23,29 +34,38 @@ class ImportPage(QtGui.QWidget):
 
     def displayPictures(self):
         for pic in self.importer:
-            self.widgets.append(PhotoListWidget(pic))
-        for widget in self.widgets:
-            self.vbox.addWidget(widget)
-        self.setLayout(self.vbox)
-        
-    
-class PhotoListWidget(QtGui.QWidget):
-    def __init__(self, pic, parent=None):
+            self.photoWidgetList.addPhoto(pic[0], pic[1])
+
+
+class PhotoWidget(QtGui.QWidget):
+    def __init__(self, imagePath, imageRotation, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        self.imagePath = pic[0]
-        self.rotation = pic[1]
+        self.path = imagePath
+        self.rotation = imageRotation
         self.setupLayout()
 
     def setupLayout(self):
-        pixmap = QtGui.QPixmap(self.imagePath).scaledToHeight(100,
-                                                              QtCore.Qt.SmoothTransformation)
+        pixmap = QtGui.QPixmap(self.path)
         if self.rotation:
             transform = QtGui.QTransform().rotate(90)
             pixmap = pixmap.transformed(transform)
+        pixmap = pixmap.scaledToHeight(100, QtCore.Qt.SmoothTransformation)
         label = QtGui.QLabel('', self)
         label.setPixmap(pixmap)
         
         hbox = QtGui.QHBoxLayout()
         hbox.addWidget(label)
         self.setLayout(hbox)
+
+    
+class PhotoWidgetList(QtGui.QWidget):
+    def __init__(self, parent=None):
+        QtGui.QWidget.__init__(self, parent)
+        self.vbox = QtGui.QVBoxLayout()
+        self.setLayout(self.vbox)
+
+    def addPhoto(self, imagePath, imageRotation):
+        self.vbox.addWidget(PhotoWidget(imagePath, imageRotation))
+        self.setLayout(self.vbox)
+        self.setMinimumSize(self.sizeHint())
 

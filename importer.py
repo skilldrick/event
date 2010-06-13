@@ -11,6 +11,8 @@ class Importer:
     pictures = [
         ('imagesdir/DSC_0004.JPG', False, False),
         ('imagesdir/DSC_0009.JPG', True, False),
+        ('imagesdir/DSC_0015.JPG', True, False),
+        ('imagesdir/DSC_0030.JPG', True, False),
         ]
 
     index = 0
