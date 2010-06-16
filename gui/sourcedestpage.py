@@ -154,10 +154,6 @@ class SourceDestPage(QtGui.QWidget):
         destination = self.destinationWidget.getSelectedPath()
         if source and destination:
             self.setSourceDest.emit(source, destination)
-            #now config has source and dest index we can actually
-            #import the images. Should assert in image importer
-            #that source and dest indexes are valid. Also, indexes
-            #are only meaningful with a model - just pass data?
             self.nextPage.emit()
         else:
             title = 'Select source and destination'

@@ -13,14 +13,6 @@ class ImportPage(QtGui.QWidget):
         self.setupLayout()
 
     def setupLayout(self):
-        """
-        scrollArea = QtGui.QScrollArea()
-        self.photoWidgetList = PhotoWidgetList()
-        scrollArea.setWidget(self.photoWidgetList)
-        outerBox = QtGui.QVBoxLayout()
-        outerBox.addWidget(scrollArea)
-        self.setLayout(outerBox)
-        """
         scrollArea = QtGui.QScrollArea()
         self.photoWidgetList = PhotoWidgetList()
         scrollArea.setWidget(self.photoWidgetList)
@@ -67,5 +59,6 @@ class PhotoWidgetList(QtGui.QWidget):
     def addPhoto(self, imagePath, imageRotation):
         self.vbox.addWidget(PhotoWidget(imagePath, imageRotation))
         self.setLayout(self.vbox)
-        self.setMinimumSize(self.sizeHint())
+        # As recommended by http://doc.trolltech.com/4.6/qscrollarea.html:
+        self.setMinimumSize(self.sizeHint()) 
 

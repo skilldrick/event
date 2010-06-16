@@ -2,7 +2,6 @@ import sys
 from PyQt4 import QtCore, QtGui
 import Image
 import ImageQt
-import optparse
 import unittest
 
 from config import Config
@@ -73,28 +72,36 @@ class MyWidget(QtGui.QWidget):
         label.setPixmap(pixmap)
 
 
-def main():
-    app = QtGui.QApplication(sys.argv)
+def provideFeatures():
     features.provide('Config', Config)
     features.provide('EventList', EventList)
     features.provide('Filesystem', Filesystem)
     features.provide('SourceList', SourceList)
     features.provide('Importer', Importer)
+        
+
+def execute(callback=None):
+    app = QtGui.QApplication(sys.argv)
     masterWidget = MasterWidget()
+    if callback:
+        callback(masterWidget)
     masterWidget.show()
     sys.exit(app.exec_())
 
 
+def modifyForTesting(widget):
+    widget.stacked.setCurrentIndex(2)
+    widget.stacked.widget3.setSourceDest('imagesdir', 'events/rugby/boys')
+    
+
 def test():
-    print 'No tests set up'
+    provideFeatures()
+    execute(modifyForTesting)
 
 
-if __name__ == '__main__':
-    parser = optparse.OptionParser()
-    parser.add_option("-t", "--test", action="store_true")
-    options, args = parser.parse_args()
-    del sys.argv[1:] #This needs to be done to make sure unittest doesn't break
-    if options.test:
-        test()
-    else:
-        main()
+def main():
+    provideFeatures()
+    execute()
+
+
+
