@@ -50,9 +50,11 @@ class PhotoWidget(QtGui.QWidget):
         #self.loadPhoto()
 
     def loadPhoto(self):
-        pixmap = QtGui.QPixmap(self.path)
-        pixmap = pixmap.scaledToWidth(self.thumbSize,
-                                      QtCore.Qt.SmoothTransformation)
+        image = QtGui.QImage(self.path)
+        thumb = image.scaledToWidth(self.thumbSize)
+                                    QtCore.Qt.SmoothTransformation)
+        pixmap = QtGui.QPixmap(thumb)
+
         if self.rotation:
             transform = QtGui.QTransform().rotate(90)
             pixmap = pixmap.transformed(transform)
@@ -66,7 +68,9 @@ class PhotoWidgetList(QtGui.QWidget):
 
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
+        self.timer = QtCore.QTimer(self)
         self.photoWidgets = []
+        self.currentIndex = 0
         self.vbox = QtGui.QVBoxLayout()
         self.setLayout(self.vbox)
 
@@ -81,14 +85,21 @@ class PhotoWidgetList(QtGui.QWidget):
         self.loadPhotos()
 
     def loadPhotos(self):
-        self.photoWidgets[0].loadPhoto()
+        self.timer.singleShot(100, self.loadPhotoByIndex)
+
+    def loadPhotoByIndex(self):
+        if self.currentIndex < len(self.photoWidgets):
+            currentPhoto = self.photoWidgets[self.currentIndex]
+            currentPhoto.loadPhoto()
+            self.currentIndex += 1
+            self.timer.singleShot(100,
+                                  self.loadPhotoByIndex)
 
     def addPhoto(self, imagePath, imageRotation):
         hbox = QtGui.QHBoxLayout()
         photoWidget = PhotoWidget(imagePath, imageRotation)
         self.photoWidgets.append(photoWidget)
         hbox.addWidget(photoWidget)
-        #add a button here to load the photo
         load = QtGui.QPushButton('Load')
         load.clicked.connect(photoWidget.loadPhoto)
         hbox.addWidget(load)
