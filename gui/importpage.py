@@ -49,18 +49,28 @@ class PhotoWidget(QtGui.QWidget):
         self.setLayout(hbox)
         #self.loadPhoto()
 
-    def loadPhoto(self):
-        image = QtGui.QImage(self.path)
-        thumb = image.scaledToWidth(self.thumbSize)
-                                    QtCore.Qt.SmoothTransformation)
-        pixmap = QtGui.QPixmap(thumb)
-
+    def loadPhoto(self, pixmap):
         if self.rotation:
             transform = QtGui.QTransform().rotate(90)
             pixmap = pixmap.transformed(transform)
         self.label.setPixmap(pixmap)
 
-        
+
+class PhotoMaker(QtCore.QObject):
+    thumbSize = 100
+
+    def makePixmap(path):
+        image = QtGui.QImage(path)
+        thumb = image.scaledToWidth(self.thumbSize,
+                                    QtCore.Qt.SmoothTransformation)
+        pixmap = QtGui.QPixmap(thumb)
+        #return pixmap
+        print 'finished making'
+
+
+class MyQThread(QtCore.QThread):
+    def run(self):
+        self.exec_()
 
     
 class PhotoWidgetList(QtGui.QWidget):
@@ -85,6 +95,14 @@ class PhotoWidgetList(QtGui.QWidget):
         self.loadPhotos()
 
     def loadPhotos(self):
+        photoMaker = PhotoMaker(self.photoWidgets[0].path)
+        thread = MyQThread()
+        photoMaker.moveToThread(thread)
+        thread.start()
+        
+
+    """
+    de loadPhotos(self):
         self.timer.singleShot(100, self.loadPhotoByIndex)
 
     def loadPhotoByIndex(self):
@@ -94,6 +112,7 @@ class PhotoWidgetList(QtGui.QWidget):
             self.currentIndex += 1
             self.timer.singleShot(100,
                                   self.loadPhotoByIndex)
+                                  """
 
     def addPhoto(self, imagePath, imageRotation):
         hbox = QtGui.QHBoxLayout()
