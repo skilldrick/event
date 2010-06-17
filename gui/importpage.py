@@ -28,7 +28,7 @@ class ImportPage(QtGui.QWidget):
 
 
 class PhotoWidget(QtGui.QWidget):
-    thumbHeight = 100
+    thumbSize = 100
     
     def __init__(self, imagePath, imageRotation, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -37,18 +37,28 @@ class PhotoWidget(QtGui.QWidget):
         self.setupLayout()
 
     def setupLayout(self):
+        #this assumes that all input images will be landscape,
+        #with possible rotation metadata. Images that are actually
+        #portrait will probably come through cropped.
+        self.label = QtGui.QLabel('Loading ...', self)
+        self.label.setAlignment(QtCore.Qt.AlignCenter)
+        self.label.setFixedSize(self.thumbSize, self.thumbSize)
+        #self.label.setFrameStyle(QtGui.QFrame.Panel)
+        hbox = QtGui.QHBoxLayout()
+        hbox.addWidget(self.label)
+        self.setLayout(hbox)
+        #self.loadPhoto()
+
+    def loadPhoto(self):
         pixmap = QtGui.QPixmap(self.path)
+        pixmap = pixmap.scaledToWidth(self.thumbSize,
+                                      QtCore.Qt.SmoothTransformation)
         if self.rotation:
             transform = QtGui.QTransform().rotate(90)
             pixmap = pixmap.transformed(transform)
-        pixmap = pixmap.scaledToHeight(self.thumbHeight,
-                                       QtCore.Qt.SmoothTransformation)
-        label = QtGui.QLabel('', self)
-        label.setPixmap(pixmap)
-        #set alignment to horizontal centre
-        hbox = QtGui.QHBoxLayout()
-        hbox.addWidget(label)
-        self.setLayout(hbox)
+        self.label.setPixmap(pixmap)
+
+        
 
     
 class PhotoWidgetList(QtGui.QWidget):
@@ -56,6 +66,7 @@ class PhotoWidgetList(QtGui.QWidget):
 
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
+        self.photoWidgets = []
         self.vbox = QtGui.QVBoxLayout()
         self.setLayout(self.vbox)
 
@@ -65,12 +76,25 @@ class PhotoWidgetList(QtGui.QWidget):
     def display(self):
         #limit number to display for testing
         for i, pic in enumerate(self.importer):
-            if i < 2:
+            if i < 4:
                 self.addPhoto(pic[0], pic[1])
+        self.loadPhotos()
+
+    def loadPhotos(self):
+        self.photoWidgets[0].loadPhoto()
 
     def addPhoto(self, imagePath, imageRotation):
-        self.vbox.addWidget(PhotoWidget(imagePath, imageRotation))
+        hbox = QtGui.QHBoxLayout()
+        photoWidget = PhotoWidget(imagePath, imageRotation)
+        self.photoWidgets.append(photoWidget)
+        hbox.addWidget(photoWidget)
+        #add a button here to load the photo
+        load = QtGui.QPushButton('Load')
+        load.clicked.connect(photoWidget.loadPhoto)
+        hbox.addWidget(load)
+        self.vbox.addLayout(hbox)
         self.setLayout(self.vbox)
         # As recommended by http://doc.trolltech.com/4.6/qscrollarea.html:
-        self.setMinimumSize(self.sizeHint()) 
+        self.setMinimumSize(self.sizeHint())
+
 
