@@ -49,7 +49,8 @@ class PhotoWidget(QtGui.QWidget):
         self.setLayout(hbox)
         #self.loadPhoto()
 
-    def loadPhoto(self, pixmap):
+    def loadPhoto(self, image):
+        pixmap = QtGui.QPixmap(image)
         if self.rotation:
             transform = QtGui.QTransform().rotate(90)
             pixmap = pixmap.transformed(transform)
@@ -59,17 +60,28 @@ class PhotoWidget(QtGui.QWidget):
 class PhotoMaker(QtCore.QObject):
     thumbSize = 100
 
-    def makePixmap(path):
-        image = QtGui.QImage(path)
+    def __init__(self, path):
+        QtCore.QObject.__init__(self)
+        self.path = path
+
+    def makeThumb(self):
+        image = QtGui.QImage(self.path)
         thumb = image.scaledToWidth(self.thumbSize,
                                     QtCore.Qt.SmoothTransformation)
-        pixmap = QtGui.QPixmap(thumb)
-        #return pixmap
-        print 'finished making'
-
+        return thumb
+        
 
 class MyQThread(QtCore.QThread):
+    madeThumb = QtCore.pyqtSignal(QtGui.QImage, int)
+    
+    def __init__(self, paths):
+        QtCore.QThread.__init__(self)
+        self.paths = paths
+    
     def run(self):
+        for i, path in enumerate(self.paths):
+            photoMaker = PhotoMaker(path)
+            self.madeThumb.emit(photoMaker.makeThumb(), i)
         self.exec_()
 
     
@@ -90,29 +102,17 @@ class PhotoWidgetList(QtGui.QWidget):
     def display(self):
         #limit number to display for testing
         for i, pic in enumerate(self.importer):
-            if i < 4:
-                self.addPhoto(pic[0], pic[1])
+            self.addPhoto(pic[0], pic[1])
         self.loadPhotos()
 
+    def loadPhoto(self, thumb, index):
+        self.photoWidgets[index].loadPhoto(thumb)
+
     def loadPhotos(self):
-        photoMaker = PhotoMaker(self.photoWidgets[0].path)
-        thread = MyQThread()
-        photoMaker.moveToThread(thread)
-        thread.start()
-        
-
-    """
-    de loadPhotos(self):
-        self.timer.singleShot(100, self.loadPhotoByIndex)
-
-    def loadPhotoByIndex(self):
-        if self.currentIndex < len(self.photoWidgets):
-            currentPhoto = self.photoWidgets[self.currentIndex]
-            currentPhoto.loadPhoto()
-            self.currentIndex += 1
-            self.timer.singleShot(100,
-                                  self.loadPhotoByIndex)
-                                  """
+        paths = [widget.path for widget in self.photoWidgets]
+        self.thread = MyQThread(paths)
+        self.thread.madeThumb.connect(self.loadPhoto)
+        self.thread.start()
 
     def addPhoto(self, imagePath, imageRotation):
         hbox = QtGui.QHBoxLayout()
