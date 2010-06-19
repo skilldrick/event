@@ -69,6 +69,7 @@ class PhotoMaker(QtCore.QObject):
 
     def makeThumb(self):
         image = QtGui.QImage(self.path)
+        assert not image.isNull(), 'Image in ' + self.path + ' is null'
         thumb = image.scaledToWidth(self.thumbSize,
                                     QtCore.Qt.SmoothTransformation)
         return thumb

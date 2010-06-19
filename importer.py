@@ -5,6 +5,13 @@ from mocks import MockFilesystem
 from featurebroker import *
 import os.path
 
+class Orientation:
+    LANDSCAPE = 0
+    PORTRAIT = 1
+    ROTATED_LANDSCAPE = 2
+    ROTATED_PORTRAIT = 3
+    
+
 class Importer:
     filesystem = RequiredFeature('Filesystem')
 
@@ -13,15 +20,8 @@ class Importer:
     #2. Make it work for pictures that start off portrait
     #3. Use this as a model so importpage can dynamically
     #   update information about import (e.g. import or not?)
-    
-    pictures = [
-        ('imagesdir/DSC_0004.JPG', False, False),
-        ('imagesdir/DSC_0009.JPG', True, False),
-        ('imagesdir/DSC_0015.JPG', True, False),
-        ('imagesdir/DSC_0030.JPG', True, False),
-        ]
 
-    index = 0
+    pictures = []
 
     def __init__(self):
         pass
@@ -31,14 +31,17 @@ class Importer:
             'Source or destination directory does not exist'
         self.source = source
         self.destination = destination
-        #for item in self.filesystem.listJpegs(self.source):
-        #    print item
+        self.loadPictures()
+
+    def loadPictures(self):
+        for item in self.filesystem.listJpegs(self.source):
+            path = self.filesystem.joinPath([self.source, item])
+            orientation = Orientation.LANDSCAPE
+            pic = (path, orientation, False)
+            self.pictures.append(pic)
 
     def getPictures(self):
         return self.pictures
-
-    def __iter__(self):
-        return self
 
     def checkLocationsExist(self, source, destination):
         return self.filesystem.checkDirExists(source) and \
@@ -60,6 +63,12 @@ class ImporterTests(unittest.TestCase):
         self.assertTrue(self.importer.checkLocationsExist(
                 self.source,
                 self.destination))
+
+    def testLoadPictures(self):
+        numberOfJpegs = len(list(
+                self.importer.filesystem.listJpegs(self.source)))
+        numberOfPictures = len(self.importer.pictures)
+        self.assertEqual(numberOfJpegs, numberOfPictures)
 
 
 def suite():

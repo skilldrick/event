@@ -43,7 +43,7 @@ class PhotoTests(unittest.TestCase):
         self.filename = 'kitten.jpg'
         self.filename2 = 'kitten-portrait.jpg'
         self.filename3 = 'DSC_0015.JPG'
-        self.filename4 = 'DSC_0030.JPG'
+        self.filename4 = 'DSC_0004.JPG'
         self.filetype = 'JPEG'
         self.photo = Photo(self.root, self.filename)
         self.photo2 = Photo(self.root, self.filename2)
