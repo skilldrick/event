@@ -34,6 +34,7 @@ class PhotoWidget(QtGui.QWidget):
         QtGui.QWidget.__init__(self, parent)
         self.path = imagePath
         self.rotation = imageRotation
+        self.config.setProperty('thumbsize', 100)
         self.thumbSize = self.config.getProperty('thumbsize')
         self.setupLayout()
 
