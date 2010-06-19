@@ -89,14 +89,13 @@ class ConfigFile:
         except IndexError:
             pass
         self.addSubElement(root, name, value)
-        return success
+        self.writeDomToFile()
 
     def writeDomToFile(self):
         file = open(self.configPath(), 'w')
         root = self.dom.childNodes[0]
         root.writexml(file)
         file.close()
-        #use the code from initConfigXml(), then replace it with this
 
     def initConfigXml(self):
         self.dom = MD.parseString('<config />')
