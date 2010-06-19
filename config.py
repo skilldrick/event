@@ -12,6 +12,7 @@ class ConfigFile:
         {'name':'Memory card', 'location':'D:/'},
         {'name':'Temp folder', 'location':'C:/Photos'}
         ]
+    initThumbSize = 200
 
     def configPath(self):
         return self._configPath
@@ -34,6 +35,7 @@ class ConfigFile:
         newElement = self.dom.createElement(name)
         parent.appendChild(newElement)
         if not contents == None:
+            contents = str(contents)
             text = self.dom.createTextNode(contents)
             newElement.appendChild(text)
         return newElement
@@ -67,6 +69,28 @@ class ConfigFile:
             ret.append(childNode.firstChild.toxml())
         return ret
 
+    def getProperty(self, name):
+        try:
+            item = self.dom.getElementsByTagName(name)[0].firstChild
+        except IndexError:
+            return None
+        text = unicode(item.toxml())
+        if text.isnumeric():
+            return int(text)
+        else:
+            return text
+
+    def setProperty(self, name, value):
+        success = True
+        root = self.dom.childNodes[0]
+        try:
+            node = self.dom.getElementsByTagName(name)[0]
+            root.removeChild(node)
+        except IndexError:
+            pass
+        self.addSubElement(root, name, value)
+        return success
+
     def writeDomToFile(self):
         file = open(self.configPath(), 'w')
         root = self.dom.childNodes[0]
@@ -77,12 +101,16 @@ class ConfigFile:
     def initConfigXml(self):
         self.dom = MD.parseString('<config />')
         root = self.dom.childNodes[0]
-        sourcelist = self.addSubElement(root, 'sourcelist')
 
+        #Set up list of sources using member initSources
+        sourcelist = self.addSubElement(root, 'sourcelist')
         for item in self.initSources:
             newItem = self.addSubElement(sourcelist, 'item')
             self.addSubElement(newItem, 'name', item['name'])
             self.addSubElement(newItem, 'location', item['location'])
+
+        #This is the thumbnail size used in importpage
+        self.addSubElement(root, 'thumbsize', self.initThumbSize)
 
         self.writeDomToFile()
 
@@ -127,6 +155,28 @@ class ConfigFileTests(unittest.TestCase):
         self.configFile.removeSource('myahhah')
         self.assertFalse('myahhah' in self.configFile.getData('sourcelist', 'name'))
 
+    def testGetProperty(self):
+        self.assertEqual(self.configFile.initThumbSize,
+                         self.configFile.getProperty('thumbsize'))
+
+    def testGetMissingProperty(self):
+        self.assertEqual(self.configFile.getProperty('dsagsadg'),
+                         None)
+
+    def testSetNewProperty(self):
+        testName = 'blahblah'
+        testValue = 100
+        self.configFile.setProperty(testName, testValue)
+        self.assertEqual(self.configFile.getProperty(testName),
+                         testValue)
+
+    def testSetExistingProperty(self):
+        testName = 'thumbsize'
+        testValue = 500
+        self.configFile.setProperty(testName, testValue)
+        self.assertEqual(self.configFile.getProperty(testName),
+                         testValue)
+        
 
 def suite():
     testSuite = unittest.makeSuite(ConfigFileTests)
@@ -162,3 +212,9 @@ class Config:
 
     def getSourceLocationList(self):
         return self.configFile.getData('sourcelist', 'location')
+
+    def getProperty(self, name):
+        return self.configFile.getProperty(name)
+
+    def setProperty(self, name, value):
+        self.configFile.setProperty(name, value)
