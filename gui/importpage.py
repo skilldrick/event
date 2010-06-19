@@ -41,21 +41,13 @@ class PhotoWidget(QtGui.QWidget):
         self.label = QtGui.QLabel('Loading ...', self)
         self.label.setAlignment(QtCore.Qt.AlignCenter)
         self.label.setFixedSize(self.thumbSize, self.thumbSize)
-        #self.label.setFrameStyle(QtGui.QFrame.Panel)
         hbox = QtGui.QHBoxLayout()
         hbox.addWidget(self.label)
         self.setLayout(hbox)
 
     def displayPhoto(self, image):
-        #move this to ThumbMaker
         orientation = self.photo.getOrientation()
         pixmap = QtGui.QPixmap(image)
-        if orientation == 2 or orientation == 3:
-            transform = QtGui.QTransform().rotate(270)
-            pixmap = pixmap.transformed(transform)
-        elif orientation == 4 or orientation == 5:
-            transform = QtGui.QTransform().rotate(90)
-            pixmap = pixmap.transformed(transform)
         self.label.setPixmap(pixmap)
 
 
@@ -71,12 +63,22 @@ class ThumbMaker(QtCore.QObject):
     def makeThumb(self):
         image = QtGui.QImage(self.path)
         assert not image.isNull(), 'Image in ' + self.path + ' is null'
-        #thumb should be scaled to whichever side makes sense
-        #dependent on orientation.
 
-        #Put the rotation bit from Photo in here as well.
-        thumb = image.scaledToWidth(self.thumbSize,
-                                    QtCore.Qt.SmoothTransformation)
+        if self.orientation == 2 or self.orientation == 3:
+            transform = QtGui.QTransform().rotate(270)
+            image = image.transformed(transform)
+        elif self.orientation == 4 or self.orientation == 5:
+            transform = QtGui.QTransform().rotate(90)
+            image = image.transformed(transform)
+
+        if self.orientation == 1 or \
+                self.orientation == 2 or \
+                self.orientation == 4:
+            thumb = image.scaledToHeight(self.thumbSize,
+                                         QtCore.Qt.SmoothTransformation)
+        else:
+            thumb = image.scaledToWidth(self.thumbSize,
+                                         QtCore.Qt.SmoothTransformation)
         return thumb
         
 

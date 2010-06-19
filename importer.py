@@ -13,8 +13,8 @@ class Importer:
 
     #Next steps for this class:
     #[1. Load pictures from image directory (badd test)] DONE
-    #2. Make it work for pictures that start off portrait
-    #(to do this make the changes to ThumbMaker on importpage.
+    #[2. Make it work for pictures that start off portrait
+    #(to do this make the changes to ThumbMaker on importpage.] DONE
     #3. Use this as a model so importpage can dynamically
     #   update information about import (e.g. import or not?)
 
