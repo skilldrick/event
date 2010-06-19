@@ -1,22 +1,18 @@
 import unittest
+import sys
 
-from filesystem import Filesystem
 from mocks import MockFilesystem
+from photo import Orientation
+from photo import Photo
 from featurebroker import *
 import os.path
 
-class Orientation:
-    LANDSCAPE = 0
-    PORTRAIT = 1
-    ROTATED_LANDSCAPE = 2
-    ROTATED_PORTRAIT = 3
-    
 
 class Importer:
     filesystem = RequiredFeature('Filesystem')
 
     #Next steps for this class:
-    #1. Load pictures from image directory (add test)
+    #[1. Load pictures from image directory (badd test)] DONE
     #2. Make it work for pictures that start off portrait
     #3. Use this as a model so importpage can dynamically
     #   update information about import (e.g. import or not?)
@@ -35,8 +31,9 @@ class Importer:
 
     def loadPictures(self):
         for item in self.filesystem.listJpegs(self.source):
+            pic = Photo(self.source, item)
             path = self.filesystem.joinPath([self.source, item])
-            orientation = Orientation.LANDSCAPE
+            orientation = pic.getOrientation()
             pic = (path, orientation, False)
             self.pictures.append(pic)
 
