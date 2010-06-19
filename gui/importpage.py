@@ -30,18 +30,14 @@ class ImportPage(QtGui.QWidget):
 class PhotoWidget(QtGui.QWidget):
     config = RequiredFeature('Config')
     
-    def __init__(self, imagePath, imageRotation, parent=None):
+    def __init__(self, photo, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        self.path = imagePath
-        self.rotation = imageRotation
+        self.photo = photo
         self.config.setProperty('thumbsize', 100)
         self.thumbSize = self.config.getProperty('thumbsize')
         self.setupLayout()
 
     def setupLayout(self):
-        #this assumes that all input images will be landscape,
-        #with possible rotation metadata. Images that are actually
-        #portrait will probably come through cropped.
         self.label = QtGui.QLabel('Loading ...', self)
         self.label.setAlignment(QtCore.Qt.AlignCenter)
         self.label.setFixedSize(self.thumbSize, self.thumbSize)
@@ -49,27 +45,36 @@ class PhotoWidget(QtGui.QWidget):
         hbox = QtGui.QHBoxLayout()
         hbox.addWidget(self.label)
         self.setLayout(hbox)
-        #self.loadPhoto()
 
-    def loadPhoto(self, image):
+    def displayPhoto(self, image):
+        #move this to ThumbMaker
+        orientation = self.photo.getOrientation()
         pixmap = QtGui.QPixmap(image)
-        if self.rotation:
+        if orientation == 2 or orientation == 3:
+            transform = QtGui.QTransform().rotate(270)
+            pixmap = pixmap.transformed(transform)
+        elif orientation == 4 or orientation == 5:
             transform = QtGui.QTransform().rotate(90)
             pixmap = pixmap.transformed(transform)
         self.label.setPixmap(pixmap)
 
 
-class PhotoMaker(QtCore.QObject):
+class ThumbMaker(QtCore.QObject):
     config = RequiredFeature('Config')
 
-    def __init__(self, path):
+    def __init__(self, path, orientation):
         QtCore.QObject.__init__(self)
+        self.orientation = orientation
         self.path = path
         self.thumbSize = self.config.getProperty('thumbsize')
 
     def makeThumb(self):
         image = QtGui.QImage(self.path)
         assert not image.isNull(), 'Image in ' + self.path + ' is null'
+        #thumb should be scaled to whichever side makes sense
+        #dependent on orientation.
+
+        #Put the rotation bit from Photo in here as well.
         thumb = image.scaledToWidth(self.thumbSize,
                                     QtCore.Qt.SmoothTransformation)
         return thumb
@@ -78,14 +83,15 @@ class PhotoMaker(QtCore.QObject):
 class MyQThread(QtCore.QThread):
     madeThumb = QtCore.pyqtSignal(QtGui.QImage, int)
     
-    def __init__(self, paths):
+    def __init__(self, photos):
         QtCore.QThread.__init__(self)
-        self.paths = paths
+        self.photos = photos
     
     def run(self):
-        for i, path in enumerate(self.paths):
-            photoMaker = PhotoMaker(path)
-            self.madeThumb.emit(photoMaker.makeThumb(), i)
+        for i, photo in enumerate(self.photos):
+            thumbMaker = ThumbMaker(photo.getPath(),
+                                    photo.getOrientation())
+            self.madeThumb.emit(thumbMaker.makeThumb(), i)
         self.exec_()
 
     
@@ -105,21 +111,21 @@ class PhotoWidgetList(QtGui.QWidget):
 
     def display(self):
         for pic in self.importer.getPictures():
-            self.addPhoto(pic[0], pic[1])
+            self.addPhoto(pic['photo'])
         self.loadPhotos()
 
-    def loadPhoto(self, thumb, index):
-        self.photoWidgets[index].loadPhoto(thumb)
+    def displayPhoto(self, thumb, index):
+        self.photoWidgets[index].displayPhoto(thumb)
 
     def loadPhotos(self):
-        paths = [widget.path for widget in self.photoWidgets]
-        self.thread = MyQThread(paths)
-        self.thread.madeThumb.connect(self.loadPhoto)
+        photos = [widget.photo for widget in self.photoWidgets]
+        self.thread = MyQThread(photos)
+        self.thread.madeThumb.connect(self.displayPhoto)
         self.thread.start()
 
-    def addPhoto(self, imagePath, imageRotation):
+    def addPhoto(self, photo):
         hbox = QtGui.QHBoxLayout()
-        photoWidget = PhotoWidget(imagePath, imageRotation)
+        photoWidget = PhotoWidget(photo)
         self.photoWidgets.append(photoWidget)
         hbox.addWidget(photoWidget)
         #add buttons etc. to the hbox now.

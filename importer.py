@@ -14,6 +14,7 @@ class Importer:
     #Next steps for this class:
     #[1. Load pictures from image directory (badd test)] DONE
     #2. Make it work for pictures that start off portrait
+    #(to do this make the changes to ThumbMaker on importpage.
     #3. Use this as a model so importpage can dynamically
     #   update information about import (e.g. import or not?)
 
@@ -31,10 +32,10 @@ class Importer:
 
     def loadPictures(self):
         for item in self.filesystem.listJpegs(self.source):
-            pic = Photo(self.source, item)
-            path = self.filesystem.joinPath([self.source, item])
-            orientation = pic.getOrientation()
-            pic = (path, orientation, False)
+            pic = {}
+            pic['photo'] = Photo(self.source, item)
+            #pic['path'] = self.filesystem.joinPath([self.source, item])
+            pic['import'] = False
             self.pictures.append(pic)
 
     def getPictures(self):

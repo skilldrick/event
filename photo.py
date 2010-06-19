@@ -15,13 +15,16 @@ class Orientation:
 class Photo:
     def __init__(self, root, filename=None):
         if filename == None:
-            self.imagepath = root
+            self.path = root
         else:
-            self.imagepath = os.path.join(root, filename)
-        self.image = Image.open(self.imagepath)
+            self.path = os.path.join(root, filename)
+        self.image = Image.open(self.path)
 
     def type(self):
         return self.image.format
+
+    def getPath(self):
+        return self.path
 
     def isLandscape(self):
         width, height = self.image.size
