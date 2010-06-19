@@ -28,6 +28,9 @@ class Importer:
         #for item in self.filesystem.listJpegs(self.source):
         #    print item
 
+    def getPictures(self):
+        return self.pictures
+
     def next(self):
         oldIndex = self.index
         self.index += 1

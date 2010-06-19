@@ -28,12 +28,13 @@ class ImportPage(QtGui.QWidget):
 
 
 class PhotoWidget(QtGui.QWidget):
-    thumbSize = 100
+    config = RequiredFeature('Config')
     
     def __init__(self, imagePath, imageRotation, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.path = imagePath
         self.rotation = imageRotation
+        self.thumbSize = self.config.getProperty('thumbsize')
         self.setupLayout()
 
     def setupLayout(self):
@@ -58,11 +59,12 @@ class PhotoWidget(QtGui.QWidget):
 
 
 class PhotoMaker(QtCore.QObject):
-    thumbSize = 100
+    config = RequiredFeature('Config')
 
     def __init__(self, path):
         QtCore.QObject.__init__(self)
         self.path = path
+        self.thumbSize = self.config.getProperty('thumbsize')
 
     def makeThumb(self):
         image = QtGui.QImage(self.path)
@@ -100,8 +102,7 @@ class PhotoWidgetList(QtGui.QWidget):
         self.importer.setLocations(source, destination)
 
     def display(self):
-        #limit number to display for testing
-        for i, pic in enumerate(self.importer):
+        for pic in self.importer.getPictures():
             self.addPhoto(pic[0], pic[1])
         self.loadPhotos()
 
@@ -119,9 +120,7 @@ class PhotoWidgetList(QtGui.QWidget):
         photoWidget = PhotoWidget(imagePath, imageRotation)
         self.photoWidgets.append(photoWidget)
         hbox.addWidget(photoWidget)
-        load = QtGui.QPushButton('Load')
-        load.clicked.connect(photoWidget.loadPhoto)
-        hbox.addWidget(load)
+        #add buttons etc. to the hbox now.
         self.vbox.addLayout(hbox)
         self.setLayout(self.vbox)
         # As recommended by http://doc.trolltech.com/4.6/qscrollarea.html:
