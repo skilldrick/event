@@ -6,21 +6,36 @@ from photo import Orientation
 
 class ImportPage(QtGui.QWidget):
     config = RequiredFeature('Config')
-    widgets = []
+    restart = QtCore.pyqtSignal()
     
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.setupLayout()
 
     def setupLayout(self):
-        self.photoWidgetList = PhotoWidgetList()
-        scrollArea = QtGui.QScrollArea()
-        scrollArea.setWidget(self.photoWidgetList)
+        self.scrollArea = QtGui.QScrollArea()
+        selectAll = QtGui.QPushButton('Select All')
+        selectNone = QtGui.QPushButton('Select None')
+        hbox = QtGui.QHBoxLayout()
+        hbox.addWidget(selectAll)
+        hbox.addWidget(selectNone)
         vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(scrollArea)
+        vbox.addLayout(hbox)
+        vbox.addWidget(self.scrollArea)
         self.setLayout(vbox)
 
     def setSourceDest(self, source, destination):
+        try:
+            self.photoWidgetList = None
+            self.restart.emit()
+        except AttributeError:
+            print 'no such thing'
+
+        self.photoWidgetList = PhotoWidgetList()
+        self.restart.connect(self.photoWidgetList.stopLoading)
+
+        self.scrollArea.setWidget(self.photoWidgetList)
+
         self.photoWidgetList.setSourceDest(source, destination)
         self.photoWidgetList.display()
 
@@ -63,7 +78,8 @@ class PhotoWidget(QtGui.QWidget):
 
 class PhotoWidgetList(QtGui.QWidget):
     importer = RequiredFeature('Importer')
-
+    stopLoading = QtCore.pyqtSignal()
+    
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.timer = QtCore.QTimer(self)
@@ -89,6 +105,7 @@ class PhotoWidgetList(QtGui.QWidget):
     def loadPhotos(self):
         photos = [widget.photo for widget in self.photoWidgets]
         self.thread = ThumbMakerThread(photos)
+        self.stopLoading.connect(self.thread.stop)
         self.thread.madeThumb.connect(self.displayPhoto)
         self.thread.start()
 
@@ -155,9 +172,16 @@ class ThumbMakerThread(QtCore.QThread):
     def __init__(self, photos):
         QtCore.QThread.__init__(self)
         self.photos = photos
+        self.stopLoading = False
+
+    def stop(self):
+        #on next iteration stop loading images
+        self.stopLoading = True
     
     def run(self):
         for i, photo in enumerate(self.photos):
+            if self.stopLoading:
+                break
             thumbMaker = ThumbMaker(photo.getPath(),
                                     photo.getOrientation())
             self.madeThumb.emit(thumbMaker.makeThumb(), i)

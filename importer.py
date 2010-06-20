@@ -18,8 +18,8 @@ class Importer:
     def setLocations(self, source, destination):
         assert self.checkLocationsExist(source, destination), \
             'Source or destination directory does not exist'
-        self.source = source
-        self.destination = destination
+        self.source = str(source)
+        self.destination = str(destination)
         self.loadPictures()
 
     def loadPictures(self):
