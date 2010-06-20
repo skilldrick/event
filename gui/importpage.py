@@ -2,6 +2,7 @@ from PyQt4 import QtCore, QtGui
 import math
 
 from featurebroker import *
+from photo import Orientation
 
 class ImportPage(QtGui.QWidget):
     config = RequiredFeature('Config')
@@ -43,14 +44,6 @@ class PhotoWidget(QtGui.QWidget):
         hbox.addWidget(self.label)
         checkbox = QtGui.QCheckBox()
         checkbox.stateChanged.connect(self.stateChanged)
-        #Maybe the checkbox should be in PhotoWidget - that way
-        #it'll have access to its index.
-        #checkbox.stateChanged.connect
-        
-        #Add a checkbox for "import this image"
-        #connect signal to importer.
-        #When checkbox changes, notify importer.
-        #will need to send the index of the checkbox.
 
         hbox.addWidget(checkbox)
         self.setLayout(hbox)
@@ -68,52 +61,6 @@ class PhotoWidget(QtGui.QWidget):
         self.label.setPixmap(pixmap)
 
 
-class ThumbMaker(QtCore.QObject):
-    config = RequiredFeature('Config')
-
-    def __init__(self, path, orientation):
-        QtCore.QObject.__init__(self)
-        self.orientation = orientation
-        self.path = path
-        self.thumbSize = self.config.getProperty('thumbsize')
-
-    def makeThumb(self):
-        image = QtGui.QImage(self.path)
-        assert not image.isNull(), 'Image in ' + self.path + ' is null'
-
-        if self.orientation == 2 or self.orientation == 3:
-            transform = QtGui.QTransform().rotate(270)
-            image = image.transformed(transform)
-        elif self.orientation == 4 or self.orientation == 5:
-            transform = QtGui.QTransform().rotate(90)
-            image = image.transformed(transform)
-
-        if self.orientation == 1 or \
-                self.orientation == 2 or \
-                self.orientation == 4:
-            thumb = image.scaledToHeight(self.thumbSize,
-                                         QtCore.Qt.SmoothTransformation)
-        else:
-            thumb = image.scaledToWidth(self.thumbSize,
-                                         QtCore.Qt.SmoothTransformation)
-        return thumb
-        
-
-class MyQThread(QtCore.QThread):
-    madeThumb = QtCore.pyqtSignal(QtGui.QImage, int)
-    
-    def __init__(self, photos):
-        QtCore.QThread.__init__(self)
-        self.photos = photos
-    
-    def run(self):
-        for i, photo in enumerate(self.photos):
-            thumbMaker = ThumbMaker(photo.getPath(),
-                                    photo.getOrientation())
-            self.madeThumb.emit(thumbMaker.makeThumb(), i)
-        self.exec_()
-
-    
 class PhotoWidgetList(QtGui.QWidget):
     importer = RequiredFeature('Importer')
 
@@ -141,7 +88,7 @@ class PhotoWidgetList(QtGui.QWidget):
 
     def loadPhotos(self):
         photos = [widget.photo for widget in self.photoWidgets]
-        self.thread = MyQThread(photos)
+        self.thread = ThumbMakerThread(photos)
         self.thread.madeThumb.connect(self.displayPhoto)
         self.thread.start()
 
@@ -152,3 +99,68 @@ class PhotoWidgetList(QtGui.QWidget):
         self.vbox.addWidget(photoWidget)
 
 
+class ThumbMaker(QtCore.QObject):
+    config = RequiredFeature('Config')
+
+    def __init__(self, path, orientation):
+        QtCore.QObject.__init__(self)
+        self.orientation = orientation
+        self.path = path
+        self.thumbSize = self.config.getProperty('thumbsize')
+
+    def unRotated(self):
+        return orientation == Orientation.LANDSCAPE or \
+            orientation == Orientation.PORTRAIT
+
+    def rotatedCW(self):
+        return self.orientation == Orientation.CW_LANDSCAPE or \
+            self.orientation == Orientation.CW_PORTRAIT
+
+    def rotatedCCW(self):
+        return self.orientation == Orientation.CCW_LANDSCAPE or \
+            self.orientation == Orientation.CCW_PORTRAIT
+
+    def rotated180(self):
+        return self.orientation == Orientation.FLIPPED_LANDSCAPE or \
+            self.orientation == Orientation.FLIPPED_PORTRAIT
+
+    def makeThumb(self):
+        image = QtGui.QImage(self.path)
+        assert not image.isNull(), 'Image in ' + self.path + ' is null'
+
+        if self.rotatedCW():
+            transform = QtGui.QTransform().rotate(270)
+            image = image.transformed(transform)
+        elif self.rotatedCCW():
+            transform = QtGui.QTransform().rotate(90)
+            image = image.transformed(transform)
+        elif self.rotated180():
+            transform = QtGui.QTransform().rotate(180)
+            image = image.transformed(transform)
+            
+        if self.orientation == 1 or \
+                self.orientation == 2 or \
+                self.orientation == 4:
+            thumb = image.scaledToHeight(self.thumbSize,
+                                         QtCore.Qt.SmoothTransformation)
+        else:
+            thumb = image.scaledToWidth(self.thumbSize,
+                                         QtCore.Qt.SmoothTransformation)
+        return thumb
+        
+
+class ThumbMakerThread(QtCore.QThread):
+    madeThumb = QtCore.pyqtSignal(QtGui.QImage, int)
+    
+    def __init__(self, photos):
+        QtCore.QThread.__init__(self)
+        self.photos = photos
+    
+    def run(self):
+        for i, photo in enumerate(self.photos):
+            thumbMaker = ThumbMaker(photo.getPath(),
+                                    photo.getOrientation())
+            self.madeThumb.emit(thumbMaker.makeThumb(), i)
+        self.exec_()
+
+    

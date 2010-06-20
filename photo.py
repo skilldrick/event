@@ -10,6 +10,8 @@ class Orientation:
     CW_PORTRAIT = 3
     CCW_LANDSCAPE = 4
     CCW_PORTRAIT = 5
+    FLIPPED_LANDSCAPE = 6
+    FLIPPED_PORTRAIT = 7
     
 
 class Photo:
@@ -34,14 +36,17 @@ class Photo:
         """Set up a table with all orientation options.
         Table is indexed by rotation and shape."""
         orientation = [
-            [Orientation.LANDSCAPE,     Orientation.PORTRAIT],
-            [Orientation.CW_LANDSCAPE,  Orientation.CW_PORTRAIT],
-            [Orientation.CCW_LANDSCAPE, Orientation.CCW_PORTRAIT]
+            [Orientation.LANDSCAPE,         Orientation.PORTRAIT],
+            [Orientation.CW_LANDSCAPE,      Orientation.CW_PORTRAIT],
+            [Orientation.CCW_LANDSCAPE,     Orientation.CCW_PORTRAIT],
+            [Orientation.FLIPPED_LANDSCAPE, Orientation.FLIPPED_PORTRAIT],
             ]
         exif = self.getExif()
-        if exif and exif['Orientation'] == 6:
+        if exif and exif['Orientation'] == 3: #180
+            rotation = 3
+        elif exif and exif['Orientation'] == 6: #90 CCW
             rotation = 2
-        elif exif and exif['Orientation'] == 8:
+        elif exif and exif['Orientation'] == 8: #90 CW
             rotation = 1
         else:
             rotation = 0
