@@ -10,14 +10,6 @@ import os.path
 
 class Importer:
     filesystem = RequiredFeature('Filesystem')
-
-    #Next steps for this class:
-    #[1. Load pictures from image directory (badd test)] DONE
-    #[2. Make it work for pictures that start off portrait
-    #(to do this make the changes to ThumbMaker on importpage.] DONE
-    #3. Use this as a model so importpage can dynamically
-    #   update information about import (e.g. import or not?)
-
     pictures = []
 
     def __init__(self):
@@ -34,7 +26,6 @@ class Importer:
         for item in self.filesystem.listJpegs(self.source):
             pic = {}
             pic['photo'] = Photo(self.source, item)
-            #pic['path'] = self.filesystem.joinPath([self.source, item])
             pic['import'] = False
             self.pictures.append(pic)
 
@@ -44,6 +35,9 @@ class Importer:
     def checkLocationsExist(self, source, destination):
         return self.filesystem.checkDirExists(source) and \
             self.filesystem.checkDirExists(destination)
+
+    def setImport(self, index):
+        self.pictures[index]['import'] = True
 
 
 class ImporterTests(unittest.TestCase):
@@ -67,6 +61,11 @@ class ImporterTests(unittest.TestCase):
                 self.importer.filesystem.listJpegs(self.source)))
         numberOfPictures = len(self.importer.pictures)
         self.assertEqual(numberOfJpegs, numberOfPictures)
+
+    def testSetImportTrue(self):
+        testIndex = 2
+        self.importer.setImport(testIndex)
+        self.assertTrue(self.importer.pictures[testIndex]['import'])
 
 
 def suite():

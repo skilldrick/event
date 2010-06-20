@@ -112,8 +112,8 @@ class PhotoWidgetList(QtGui.QWidget):
         self.importer.setLocations(source, destination)
 
     def display(self):
-        for pic in self.importer.getPictures():
-            self.addPhoto(pic['photo'])
+        for i, pic in enumerate(self.importer.getPictures()):
+            self.addPhoto(pic['photo'], i)
         self.loadPhotos()
 
     def displayPhoto(self, thumb, index):
@@ -125,12 +125,17 @@ class PhotoWidgetList(QtGui.QWidget):
         self.thread.madeThumb.connect(self.displayPhoto)
         self.thread.start()
 
-    def addPhoto(self, photo):
+    def addPhoto(self, photo, index):
         hbox = QtGui.QHBoxLayout()
         photoWidget = PhotoWidget(photo)
         self.photoWidgets.append(photoWidget)
         hbox.addWidget(photoWidget)
-        #add buttons etc. to the hbox now.
+        
+        #Add a checkbox for "import this image"
+        #connect signal to importer.
+        #When checkbox changes, notify importer.
+        #will need to send the index of the checkbox.
+        
         self.vbox.addLayout(hbox)
         self.setLayout(self.vbox)
         # As recommended by http://doc.trolltech.com/4.6/qscrollarea.html:
