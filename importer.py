@@ -36,8 +36,8 @@ class Importer:
         return self.filesystem.checkDirExists(source) and \
             self.filesystem.checkDirExists(destination)
 
-    def setImport(self, index):
-        self.pictures[index]['import'] = True
+    def setImport(self, index, doImport=True):
+        self.pictures[index]['import'] = doImport
 
 
 class ImporterTests(unittest.TestCase):

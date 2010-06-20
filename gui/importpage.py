@@ -21,19 +21,17 @@ class ImportPage(QtGui.QWidget):
 
     def setSourceDest(self, source, destination):
         self.photoWidgetList.setSourceDest(source, destination)
-        self.displayPictures()
-
-    def displayPictures(self):
         self.photoWidgetList.display()
 
 
 class PhotoWidget(QtGui.QWidget):
     config = RequiredFeature('Config')
+    setImport = QtCore.pyqtSignal(int, bool)
     
-    def __init__(self, photo, parent=None):
+    def __init__(self, photo, index, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.photo = photo
-        self.config.setProperty('thumbsize', 100)
+        self.index = index
         self.thumbSize = self.config.getProperty('thumbsize')
         self.setupLayout()
 
@@ -43,7 +41,26 @@ class PhotoWidget(QtGui.QWidget):
         self.label.setFixedSize(self.thumbSize, self.thumbSize)
         hbox = QtGui.QHBoxLayout()
         hbox.addWidget(self.label)
+        checkbox = QtGui.QCheckBox()
+        checkbox.stateChanged.connect(self.stateChanged)
+        #Maybe the checkbox should be in PhotoWidget - that way
+        #it'll have access to its index.
+        #checkbox.stateChanged.connect
+        
+        #Add a checkbox for "import this image"
+        #connect signal to importer.
+        #When checkbox changes, notify importer.
+        #will need to send the index of the checkbox.
+
+        hbox.addWidget(checkbox)
         self.setLayout(hbox)
+
+    def stateChanged(self, state):
+        if state == QtCore.Qt.Unchecked:
+            state = False
+        else:
+            state = True
+        self.setImport.emit(self.index, state)
 
     def displayPhoto(self, image):
         orientation = self.photo.getOrientation()
@@ -104,7 +121,6 @@ class PhotoWidgetList(QtGui.QWidget):
         QtGui.QWidget.__init__(self, parent)
         self.timer = QtCore.QTimer(self)
         self.photoWidgets = []
-        self.currentIndex = 0
         self.vbox = QtGui.QVBoxLayout()
         self.setLayout(self.vbox)
 
@@ -114,6 +130,10 @@ class PhotoWidgetList(QtGui.QWidget):
     def display(self):
         for i, pic in enumerate(self.importer.getPictures()):
             self.addPhoto(pic['photo'], i)
+
+        self.setLayout(self.vbox)
+        # As recommended by http://doc.trolltech.com/4.6/qscrollarea.html:
+        self.setMinimumSize(self.sizeHint())
         self.loadPhotos()
 
     def displayPhoto(self, thumb, index):
@@ -126,19 +146,9 @@ class PhotoWidgetList(QtGui.QWidget):
         self.thread.start()
 
     def addPhoto(self, photo, index):
-        hbox = QtGui.QHBoxLayout()
-        photoWidget = PhotoWidget(photo)
+        photoWidget = PhotoWidget(photo, index)
+        photoWidget.setImport.connect(self.importer.setImport)
         self.photoWidgets.append(photoWidget)
-        hbox.addWidget(photoWidget)
-        
-        #Add a checkbox for "import this image"
-        #connect signal to importer.
-        #When checkbox changes, notify importer.
-        #will need to send the index of the checkbox.
-        
-        self.vbox.addLayout(hbox)
-        self.setLayout(self.vbox)
-        # As recommended by http://doc.trolltech.com/4.6/qscrollarea.html:
-        self.setMinimumSize(self.sizeHint())
+        self.vbox.addWidget(photoWidget)
 
 
