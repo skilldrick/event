@@ -116,7 +116,7 @@ class CategoryWidget(Shared):
             qVariant = self.model.data(index,
                                        QtGui.QFileSystemModel.FilePathRole)
             return qVariant.toString()
-
+            
         
 class SourceDestPage(QtGui.QWidget):
     config = RequiredFeature('Config')

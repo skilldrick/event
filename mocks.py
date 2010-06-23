@@ -6,11 +6,10 @@ class MockFilesystem (Filesystem):
     
     def listDirs(self, root):
         return ['My event', 'event2', 'another event']
-
+"""
     def makeDir(self, dirname):
         if not self.checkValidDir(dirname):
             raise IOError
         if not type(dirname) == list:
             assert False, 'dirname should be list'
-
-
+"""

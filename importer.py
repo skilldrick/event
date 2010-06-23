@@ -2,6 +2,7 @@ import unittest
 import sys
 
 from mocks import MockFilesystem
+from filesystem import Filesystem
 from photo import Orientation
 from photo import Photo
 from featurebroker import *
@@ -16,10 +17,11 @@ class Importer:
         pass
 
     def setLocations(self, source, destination):
-        assert self.checkLocationsExist(source, destination), \
-            'Source or destination directory does not exist'
-        self.source = str(source)
-        self.destination = str(destination)
+        assert self.checkLocationExists(source), 'Source directory does not exist'
+        assert self.checkLocationExists(destination), \
+                                            'Destination directory does not exist'
+        self.source = source
+        self.destination = destination
         self.loadPictures()
 
     def loadPictures(self):
@@ -32,29 +34,31 @@ class Importer:
     def getPictures(self):
         return self.pictures
 
-    def checkLocationsExist(self, source, destination):
-        return self.filesystem.checkDirExists(source) and \
-            self.filesystem.checkDirExists(destination)
+    def checkLocationExists(self, location):
+        return self.filesystem.checkDirExists(location)
 
     def setImport(self, index, doImport=True):
         self.pictures[index]['import'] = doImport
 
 
 class ImporterTests(unittest.TestCase):
+    filesystem = Filesystem()
     source = 'imagesdir'
     destination = ['events', 'rugby', 'boys']
     
     def setUp(self):
         features.provide('Filesystem', MockFilesystem)
+        if not self.filesystem.checkDirExists(self.destination):
+            self.filesystem.makeDir(self.destination)
         self.importer = Importer()
         self.importer.setLocations(self.source, self.destination)
 
     def testLocations(self):
+        
         self.assertEqual(self.source, self.importer.source)
         self.assertEqual(self.destination, self.importer.destination)
-        self.assertTrue(self.importer.checkLocationsExist(
-                self.source,
-                self.destination))
+        self.assertTrue(self.importer.checkLocationExists(self.source))
+        self.assertTrue(self.importer.checkLocationExists(self.destination))
 
     def testLoadPictures(self):
         numberOfJpegs = len(list(

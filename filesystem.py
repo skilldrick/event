@@ -27,6 +27,8 @@ class Filesystem:
     
     def joinPath(self, dirname):
         if type(dirname) == list:
+            #just in case any QStrings get through:
+            dirname = [str(dir) for dir in dirname]
             dirname = os.path.join(*dirname)
         return dirname
 
@@ -64,6 +66,7 @@ class Filesystem:
         ret = []
         for x in os.walk(root):
             ret.append(x)
+        ret.sort()
         return ret
 
     def listToplevelDirs(self, parent):
@@ -71,6 +74,7 @@ class Filesystem:
             root, dirs, files = os.walk(parent).next()
         except StopIteration: #.next() doesn't work if no dirs
             root, dirs, files = [], [], []
+        dirs.sort()
         return dirs
 
     @join

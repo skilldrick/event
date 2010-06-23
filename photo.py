@@ -3,6 +3,8 @@ import os.path
 import Image
 from PIL.ExifTags import TAGS
 
+from featurebroker import *
+
 class Orientation:
     LANDSCAPE = 0
     PORTRAIT = 1
@@ -15,11 +17,13 @@ class Orientation:
     
 
 class Photo:
+    filesystem = RequiredFeature('Filesystem')
+    
     def __init__(self, root, filename=None):
         if filename == None:
             self.path = root
         else:
-            self.path = os.path.join(root, filename)
+            self.path = self.filesystem.joinPath([root, filename])
         self.image = Image.open(self.path)
 
     def type(self):
