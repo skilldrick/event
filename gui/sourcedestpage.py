@@ -30,6 +30,7 @@ class SourceWidget(Shared):
         vbox.addWidget(self.view)
         vbox.addWidget(self.addButton)
         vbox.addWidget(self.removeButton)
+        vbox.setContentsMargins(0, 0, 0, 0)
         self.setLayout(vbox)
 
     def getItem(self):
@@ -85,6 +86,7 @@ class CategoryWidget(Shared):
         vbox.addWidget(self.view)
         vbox.addWidget(self.addButton)
         vbox.addWidget(self.removeButton)
+        vbox.setContentsMargins(0, 0, 0, 0)
         self.setLayout(vbox)
         
     def setEvent(self, eventName):
@@ -146,6 +148,7 @@ class SourceDestPage(QtGui.QWidget):
         grid.addWidget(self.destinationWidget, 1, 1)
         grid.addWidget(self.backButton, 3, 0)
         grid.addWidget(self.importButton, 3, 1)
+        grid.setContentsMargins(0, 0, 0, 0)
 
         self.setLayout(grid)
 

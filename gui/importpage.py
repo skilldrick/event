@@ -9,6 +9,8 @@ from importer import Importer
 class ImportPage(QtGui.QWidget):
     config = RequiredFeature('Config')
     stopLoading = QtCore.pyqtSignal()
+    previousPage = QtCore.pyqtSignal()
+    importSelected = QtCore.pyqtSignal()
     
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -18,12 +20,24 @@ class ImportPage(QtGui.QWidget):
         self.scrollArea = QtGui.QScrollArea()
         self.selectAllButton = QtGui.QPushButton('Select All')
         self.selectNoneButton = QtGui.QPushButton('Select None')
-        hbox = QtGui.QHBoxLayout()
-        hbox.addWidget(self.selectAllButton)
-        hbox.addWidget(self.selectNoneButton)
+        topHbox = QtGui.QHBoxLayout()
+        topHbox.addStretch()
+        topHbox.addWidget(self.selectAllButton)
+        topHbox.addWidget(self.selectNoneButton)
+        topHbox.addStretch()
         vbox = QtGui.QVBoxLayout()
-        vbox.addLayout(hbox)
+        vbox.addLayout(topHbox)
         vbox.addWidget(self.scrollArea)
+        bottomHbox = QtGui.QHBoxLayout()
+        backButton = QtGui.QPushButton('Back')
+        backButton.clicked.connect(self.previousPage)
+        importButton = QtGui.QPushButton('Import selected images')
+        importButton.clicked.connect(self.importSelected)
+        bottomHbox.addStretch()
+        bottomHbox.addWidget(backButton)
+        bottomHbox.addWidget(importButton)
+        bottomHbox.addStretch()
+        vbox.addLayout(bottomHbox)
         self.setLayout(vbox)
 
     def setSourceDest(self, source, destination):
@@ -41,6 +55,14 @@ class ImportPage(QtGui.QWidget):
         previous photoWidgetList. Then photoWidgetList is
         reconstructed with (new) source and destination.
         """
+        try:
+            #if source is same as last time then don't do anything
+            if self.source == source:
+                return
+        except AttributeError:
+            pass
+        self.source = source
+        self.destination = destination
         self.stopLoading.emit()
         self.photoWidgetList = None
 
@@ -149,7 +171,7 @@ class ThumbMaker(QtCore.QObject):
     """The only thing that hasn't been properly tested in this
     class is images with more obscure exif rotation data.
     Landscape, portrait, and cw-landscape and portrait tested,
-    but none of the others, especially those flipped 180 degrees.
+    but none of the others, especially those rotated 180 degrees.
     """
 
     def __init__(self, path, orientation):

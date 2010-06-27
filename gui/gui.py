@@ -27,6 +27,7 @@ class Stacked(QtGui.QStackedWidget):
         self.widget2.previousPage.connect(self.previousPage)
         self.widget2.nextPage.connect(self.nextPage)
         self.widget2.setSourceDest.connect(self.widget3.setSourceDest)
+        self.widget3.previousPage.connect(self.previousPage)
         self.addWidget(self.widget1)
         self.addWidget(self.widget2)
         self.addWidget(self.widget3)
@@ -51,12 +52,7 @@ class MasterWidget(QtGui.QWidget):
         self.next = QtGui.QPushButton('Next')
         self.next.clicked.connect(self.stacked.nextPage)
 
-        hbox = QtGui.QHBoxLayout()
-        hbox.addWidget(self.previous)
-        hbox.addWidget(self.next)
-        
         vbox.addWidget(self.stacked)        
-        vbox.addLayout(hbox)
         self.setLayout(vbox)
 
 
