@@ -16,9 +16,10 @@ class Importer:
         self.pictures = []
 
     def setLocations(self, source, destination):
-        assert self.checkLocationExists(source), 'Source directory does not exist'
+        assert self.checkLocationExists(source), \
+            'Source directory does not exist'
         assert self.checkLocationExists(destination), \
-                                            'Destination directory does not exist'
+            'Destination directory does not exist'
         self.source = source
         self.destination = destination
         self.loadPictures()

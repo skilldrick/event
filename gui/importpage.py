@@ -41,7 +41,6 @@ class ImportPage(QtGui.QWidget):
         previous photoWidgetList. Then photoWidgetList is
         reconstructed with (new) source and destination.
         """
-        #currently importer is filling up with multiple sets.
         self.stopLoading.emit()
         self.photoWidgetList = None
 
@@ -147,16 +146,17 @@ class PhotoWidgetList(QtGui.QWidget):
 
 class ThumbMaker(QtCore.QObject):
     config = RequiredFeature('Config')
+    """The only thing that hasn't been properly tested in this
+    class is images with more obscure exif rotation data.
+    Landscape, portrait, and cw-landscape and portrait tested,
+    but none of the others, especially those flipped 180 degrees.
+    """
 
     def __init__(self, path, orientation):
         QtCore.QObject.__init__(self)
         self.orientation = orientation
         self.path = path
         self.thumbSize = self.config.getProperty('thumbsize')
-
-    def unRotated(self):
-        return orientation == Orientation.LANDSCAPE or \
-            orientation == Orientation.PORTRAIT
 
     def rotatedCW(self):
         return self.orientation == Orientation.CW_LANDSCAPE or \
@@ -168,6 +168,12 @@ class ThumbMaker(QtCore.QObject):
 
     def rotated180(self):
         return self.orientation == Orientation.FLIPPED_LANDSCAPE or \
+            self.orientation == Orientation.FLIPPED_PORTRAIT
+
+    def scaleByHeight(self):
+        return self.orientation == Orientation.PORTRAIT or \
+            self.orientation == Orientation.CW_LANDSCAPE or \
+            self.orientation == Orientation.CCW_LANDSCAPE or \
             self.orientation == Orientation.FLIPPED_PORTRAIT
 
     def makeThumb(self):
@@ -184,9 +190,7 @@ class ThumbMaker(QtCore.QObject):
             transform = QtGui.QTransform().rotate(180)
             image = image.transformed(transform)
             
-        if self.orientation == 1 or \
-                self.orientation == 2 or \
-                self.orientation == 4:
+        if self.scaleByHeight():
             thumb = image.scaledToHeight(self.thumbSize,
                                          QtCore.Qt.SmoothTransformation)
         else:
