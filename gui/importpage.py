@@ -16,11 +16,11 @@ class ImportPage(QtGui.QWidget):
 
     def setupLayout(self):
         self.scrollArea = QtGui.QScrollArea()
-        selectAll = QtGui.QPushButton('Select All')
-        selectNone = QtGui.QPushButton('Select None')
+        self.selectAllButton = QtGui.QPushButton('Select All')
+        self.selectNoneButton = QtGui.QPushButton('Select None')
         hbox = QtGui.QHBoxLayout()
-        hbox.addWidget(selectAll)
-        hbox.addWidget(selectNone)
+        hbox.addWidget(self.selectAllButton)
+        hbox.addWidget(self.selectNoneButton)
         vbox = QtGui.QVBoxLayout()
         vbox.addLayout(hbox)
         vbox.addWidget(self.scrollArea)
@@ -34,7 +34,7 @@ class ImportPage(QtGui.QWidget):
         source or destination) the threads will carry on happily.
         Therefore we need to do some tidying up first. stopLoading
         is connected ultimately to the thumbMakerThread, and will
-        cause the thread to stop processing.
+        cause the thread to stop making thumbs.
 
         stopLoading is only connected after it is first emitted,
         so will stop the thumbMakerThread associated with the
@@ -47,6 +47,8 @@ class ImportPage(QtGui.QWidget):
 
         self.photoWidgetList = PhotoWidgetListMaker()
         self.stopLoading.connect(self.photoWidgetList.stopLoading)
+        self.selectAllButton.clicked.connect(self.photoWidgetList.selectAll)
+        self.selectNoneButton.clicked.connect(self.photoWidgetList.selectNone)
 
         self.scrollArea.setWidget(self.photoWidgetList)
 
@@ -57,7 +59,8 @@ class ImportPage(QtGui.QWidget):
 class PhotoWidget(QtGui.QWidget):
     config = RequiredFeature('Config')
     setImport = QtCore.pyqtSignal(int, bool)
-    
+    select = QtCore.pyqtSignal(bool)
+
     def __init__(self, photo, index, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.photo = photo
@@ -71,10 +74,11 @@ class PhotoWidget(QtGui.QWidget):
         self.label.setFixedSize(self.thumbSize, self.thumbSize)
         hbox = QtGui.QHBoxLayout()
         hbox.addWidget(self.label)
-        checkbox = QtGui.QCheckBox()
-        checkbox.stateChanged.connect(self.stateChanged)
+        self.checkbox = QtGui.QCheckBox()
+        self.checkbox.stateChanged.connect(self.stateChanged)
+        self.select.connect(self.checkbox.setChecked)
 
-        hbox.addWidget(checkbox)
+        hbox.addWidget(self.checkbox)
         self.setLayout(hbox)
 
     def stateChanged(self, state):
@@ -96,6 +100,7 @@ def PhotoWidgetListMaker():
 
 class PhotoWidgetList(QtGui.QWidget):
     stopLoading = QtCore.pyqtSignal()
+    select = QtCore.pyqtSignal(bool)
     
     def __init__(self, importer, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -126,9 +131,16 @@ class PhotoWidgetList(QtGui.QWidget):
         self.thread.madeThumb.connect(self.displayPhoto)
         self.thread.start()
 
+    def selectAll(self):
+        self.select.emit(True)
+
+    def selectNone(self):
+        self.select.emit(False)
+
     def addPhoto(self, photo, index):
         photoWidget = PhotoWidget(photo, index)
         photoWidget.setImport.connect(self.importer.setImport)
+        self.select.connect(photoWidget.select)
         self.photoWidgets.append(photoWidget)
         self.vbox.addWidget(photoWidget)
 
