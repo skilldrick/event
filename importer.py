@@ -11,10 +11,10 @@ import os.path
 
 class Importer:
     filesystem = RequiredFeature('Filesystem')
-    pictures = []
 
     def __init__(self):
-        pass
+        self.pictures = []
+        print len(self.pictures)
 
     def setLocations(self, source, destination):
         assert self.checkLocationExists(source), 'Source directory does not exist'

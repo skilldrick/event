@@ -3,10 +3,12 @@ import math
 
 from featurebroker import *
 from photo import Orientation
+from importer import Importer
+
 
 class ImportPage(QtGui.QWidget):
     config = RequiredFeature('Config')
-    restart = QtCore.pyqtSignal()
+    stopLoading = QtCore.pyqtSignal()
     
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -25,14 +27,26 @@ class ImportPage(QtGui.QWidget):
         self.setLayout(vbox)
 
     def setSourceDest(self, source, destination):
-        try:
-            self.photoWidgetList = None
-            self.restart.emit()
-        except AttributeError:
-            print 'no such thing'
+        """
+        setSourceDest is called by a signal from previous page.
+        Because it does some stuff in a separate thread, if it is
+        called multiple times (e.g. if the user goes back to change
+        source or destination) the threads will carry on happily.
+        Therefore we need to do some tidying up first. stopLoading
+        is connected ultimately to the thumbMakerThread, and will
+        cause the thread to stop processing.
 
-        self.photoWidgetList = PhotoWidgetList()
-        self.restart.connect(self.photoWidgetList.stopLoading)
+        stopLoading is only connected after it is first emitted,
+        so will stop the thumbMakerThread associated with the
+        previous photoWidgetList. Then photoWidgetList is
+        reconstructed with (new) source and destination.
+        """
+        #currently importer is filling up with multiple sets.
+        self.stopLoading.emit()
+        self.photoWidgetList = None
+
+        self.photoWidgetList = PhotoWidgetListMaker()
+        self.stopLoading.connect(self.photoWidgetList.stopLoading)
 
         self.scrollArea.setWidget(self.photoWidgetList)
 
@@ -76,13 +90,16 @@ class PhotoWidget(QtGui.QWidget):
         self.label.setPixmap(pixmap)
 
 
+def PhotoWidgetListMaker():
+    return PhotoWidgetList(Importer())
+
+
 class PhotoWidgetList(QtGui.QWidget):
-    importer = RequiredFeature('Importer')
     stopLoading = QtCore.pyqtSignal()
     
-    def __init__(self, parent=None):
+    def __init__(self, importer, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        self.timer = QtCore.QTimer(self)
+        self.importer = importer
         self.photoWidgets = []
         self.vbox = QtGui.QVBoxLayout()
         self.setLayout(self.vbox)
@@ -177,7 +194,7 @@ class ThumbMakerThread(QtCore.QThread):
     def stop(self):
         #on next iteration stop loading images
         self.stopLoading = True
-    
+
     def run(self):
         for i, photo in enumerate(self.photos):
             if self.stopLoading:
@@ -185,6 +202,7 @@ class ThumbMakerThread(QtCore.QThread):
             thumbMaker = ThumbMaker(photo.getPath(),
                                     photo.getOrientation())
             self.madeThumb.emit(thumbMaker.makeThumb(), i)
+    
         self.exec_()
 
     
