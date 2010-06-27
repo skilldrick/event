@@ -68,6 +68,7 @@ class ImportPage(QtGui.QWidget):
 
         self.photoWidgetList = PhotoWidgetListMaker()
         self.stopLoading.connect(self.photoWidgetList.stopLoading)
+        self.importSelected.connect(self.photoWidgetList.importSelected)
         self.selectAllButton.clicked.connect(self.photoWidgetList.selectAll)
         self.selectNoneButton.clicked.connect(self.photoWidgetList.selectNone)
 
@@ -122,10 +123,12 @@ def PhotoWidgetListMaker():
 class PhotoWidgetList(QtGui.QWidget):
     stopLoading = QtCore.pyqtSignal()
     select = QtCore.pyqtSignal(bool)
+    importSelected = QtCore.pyqtSignal()
     
     def __init__(self, importer, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.importer = importer
+        self.importSelected.connect(self.importer.importSelected)
         self.photoWidgets = []
         self.vbox = QtGui.QVBoxLayout()
         self.setLayout(self.vbox)
@@ -242,5 +245,3 @@ class ThumbMakerThread(QtCore.QThread):
             self.madeThumb.emit(thumbMaker.makeThumb(), i)
     
         self.exec_()
-
-    

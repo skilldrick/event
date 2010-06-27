@@ -40,6 +40,10 @@ class Importer:
     def setImport(self, index, doImport=True):
         self.pictures[index]['import'] = doImport
 
+    def importSelected(self):
+        for pic in self.pictures:
+            print pic['photo'].path, pic['import']
+
 
 class ImporterTests(unittest.TestCase):
     filesystem = Filesystem()

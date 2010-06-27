@@ -146,8 +146,9 @@ class SourceDestPage(QtGui.QWidget):
         grid.addWidget(label, 0, 0, 1, 2)
         grid.addWidget(self.sourceWidget, 1, 0)
         grid.addWidget(self.destinationWidget, 1, 1)
-        grid.addWidget(self.backButton, 3, 0)
-        grid.addWidget(self.importButton, 3, 1)
+        grid.setRowMinimumHeight(3, 20)
+        grid.addWidget(self.backButton, 4, 0, QtCore.Qt.AlignHCenter)
+        grid.addWidget(self.importButton, 4, 1, QtCore.Qt.AlignHCenter)
         grid.setContentsMargins(0, 0, 0, 0)
 
         self.setLayout(grid)
