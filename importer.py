@@ -41,6 +41,10 @@ class Importer:
         self.pictures[index]['import'] = doImport
 
     def importSelected(self):
+        """
+        copy all images to destination then delete
+        all source images. Confirm?
+        """
         for pic in self.pictures:
             print pic['photo'].path, pic['import']
 

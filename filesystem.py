@@ -19,10 +19,13 @@ class Filesystem:
         return new_f
 
     def join2(f):
-        def new_f(self, pathname1, pathname2):
+        def new_f(self, pathname1, pathname2, extraParam=None):
             pathname1 = self.joinPath(pathname1)
             pathname2 = self.joinPath(pathname2)
-            return f(self, pathname1, pathname2)
+            if extraParam:
+                return f(self, pathname1, pathname2, extraParam)
+            else:
+                return f(self, pathname1, pathname2)
         return new_f
     
     def joinPath(self, dirname):
@@ -96,7 +99,9 @@ class Filesystem:
         return self.listFiles(root, extensions)
 
     @join2
-    def copy(self, source, destination):
+    def copy(self, source, destination, failOnExist=False):
+        if failOnExist and self.checkFileExists(destination):
+            return False
         shutil.copy2(source, destination)
 
     @join
@@ -251,6 +256,20 @@ class FilesystemTests(unittest.TestCase):
         self.filesystem.copy(source, destination)
         self.assertTrue(self.filesystem.checkFileExists(destination))
         self.filesystem.removeFile(destination)
+
+    def testCopyOverFile(self):
+        """
+        Test copying file over another file, and confirm
+        new file is same as old file.
+        """
+        pass
+
+    def testCopyOverFileWithFail(self):
+        """
+        Test copying file over another file, and confirm
+        it fails and nothing changes
+        """
+        pass
 
 
 def suite():
