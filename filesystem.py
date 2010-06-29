@@ -101,13 +101,16 @@ class Filesystem:
     @join2
     def copy(self, source, destination, failOnExist=False):
         if failOnExist and self.checkFileExists(destination):
-            return False
+            raise IOError
         shutil.copy2(source, destination)
 
     @join
     def removeFile(self, filename):
         os.remove(filename)
-    
+
+    @join
+    def getFileSize(self, filename):
+        return os.path.getsize(filename)
         
 
 class FilesystemTests(unittest.TestCase):
@@ -121,6 +124,7 @@ class FilesystemTests(unittest.TestCase):
         ['testdir', 'dir2', 'sub2'],
         ['testdir', 'dir2', 'x, a dir with spaces'],
         ]
+    imagesDir = 'imagesdir'
     
     def setUp(self):
         self.root = 'testdir'
@@ -247,29 +251,39 @@ class FilesystemTests(unittest.TestCase):
         self.removeFiles(filenames)
 
     def testFileExists(self):
-        filename = ['imagesdir', 'kitten.jpg']
+        filename = [self.imagesDir, 'kitten.jpg']
         self.assertTrue(self.filesystem.checkFileExists(filename))
 
     def testCopyFile(self):
-        source = ['imagesdir', 'kitten.jpg']
+        source = [self.imagesDir, 'kitten.jpg']
         destination = ['testdir', 'testkitten.jpg']
         self.filesystem.copy(source, destination)
         self.assertTrue(self.filesystem.checkFileExists(destination))
         self.filesystem.removeFile(destination)
 
     def testCopyOverFile(self):
-        """
-        Test copying file over another file, and confirm
-        new file is same as old file.
-        """
-        pass
+
+        file1 = [self.imagesDir, 'The Garden 17th June 017.JPG']
+        file2 = [self.imagesDir, 'The Garden 17th June 019.JPG']
+        file1Size = self.filesystem.getFileSize(file1)
+        file2Size = self.filesystem.getFileSize(file2)
+        self.assertNotEqual(file1Size, file2Size,
+                            'Files under test are equal size already')
+        self.filesystem.copy(file1, file2)
+        file2NewSize = self.filesystem.getFileSize(file2)
+        self.assertEqual(file1Size, file2NewSize,
+                         'Didn\'t copy over file')
 
     def testCopyOverFileWithFail(self):
-        """
-        Test copying file over another file, and confirm
-        it fails and nothing changes
-        """
-        pass
+        file1 = [self.imagesDir, 'The Garden 17th June 015.JPG']
+        file2 = [self.imagesDir, 'The Garden 17th June 016.JPG']
+        file1Size = self.filesystem.getFileSize(file1)
+        file2Size = self.filesystem.getFileSize(file2)
+        try:
+            self.filesystem.copy(file1, file2, True)
+            self.fail('Copy did not raise exception')
+        except IOError:
+            pass
 
 
 def suite():

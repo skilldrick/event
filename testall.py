@@ -5,6 +5,7 @@ import filesystem
 import photo
 import importer
 import config
+from reset import Reset
 
 
 def main():
@@ -16,7 +17,10 @@ def main():
     suites.append(config.suite())
     allTests = unittest.TestSuite(suites)
     runner = unittest.TextTestRunner()
+    reset = Reset()
+    reset.fill() #fill imagesdir with images
     runner.run(allTests)
+    reset.empty() #delete images in imagesdir
 
 
 if __name__ == '__main__':
