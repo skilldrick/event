@@ -10,6 +10,7 @@ if __name__ == '__main__':
     options, args = parser.parse_args()
     #This needs to be done to make sure unittest doesn't break
     del sys.argv[1:]
+
     if options.test:
         gui.test()
     else:

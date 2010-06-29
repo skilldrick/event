@@ -262,7 +262,6 @@ class FilesystemTests(unittest.TestCase):
         self.filesystem.removeFile(destination)
 
     def testCopyOverFile(self):
-
         file1 = [self.imagesDir, 'The Garden 17th June 017.JPG']
         file2 = [self.imagesDir, 'The Garden 17th June 019.JPG']
         file1Size = self.filesystem.getFileSize(file1)

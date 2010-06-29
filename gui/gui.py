@@ -13,6 +13,7 @@ from featurebroker import *
 from .eventspage import EventsPage
 from .sourcedestpage import SourceDestPage
 from .importpage import ImportPage
+from reset import Reset
 
 
 class Stacked(QtGui.QStackedWidget):
@@ -77,12 +78,16 @@ def provideFeatures():
         
 
 def execute(callback=None):
+    reset = Reset()
+    reset.fill() #fill imagesdir with images
     app = QtGui.QApplication(sys.argv)
     masterWidget = MasterWidget()
     if callback:
         callback(masterWidget)
     masterWidget.show()
-    sys.exit(app.exec_())
+    exitValue = app.exec_()
+    reset.empty() #delete images in imagesdir
+    sys.exit(exitValue)
 
 
 def modifyForTesting(widget):
