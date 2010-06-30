@@ -98,6 +98,10 @@ class Filesystem:
         extensions = ('jpg', 'JPG', 'jpeg', 'JPEG')
         return self.listFiles(root, extensions)
 
+    @join
+    def getFilename(self, path):
+        return os.path.basename(path)
+
     @join2
     def copy(self, source, destination, failOnExist=False):
         if failOnExist and self.checkFileExists(destination):
@@ -283,6 +287,11 @@ class FilesystemTests(unittest.TestCase):
             self.fail('Copy did not raise exception')
         except IOError:
             pass
+
+    def testGetFilename(self):
+        path = ['test1', 'test2', 'cat.jpg']
+        filename = self.filesystem.getFilename(path)
+        self.assertEqual(path[2], filename)
 
 
 def suite():

@@ -46,7 +46,11 @@ class Importer:
         all source images. Confirm?
         """
         for pic in self.pictures:
-            print pic['photo'].path, pic['import']
+            if pic['import']:
+                path = pic['photo'].path
+                newPath = [self.destination,
+                           self.filesystem.getFilename(path)]
+                self.filesystem.copy(path, newPath)
 
 
 class ImporterTests(unittest.TestCase):
@@ -62,7 +66,6 @@ class ImporterTests(unittest.TestCase):
         self.importer.setLocations(self.source, self.destination)
 
     def testLocations(self):
-        
         self.assertEqual(self.source, self.importer.source)
         self.assertEqual(self.destination, self.importer.destination)
         self.assertTrue(self.importer.checkLocationExists(self.source))
