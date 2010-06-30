@@ -30,6 +30,8 @@ class Filesystem:
     
     def joinPath(self, dirname):
         if type(dirname) == list:
+            #Recursively join paths:
+            dirname = [self.joinPath(dir) for dir in dirname]
             #just in case any QStrings get through:
             dirname = [str(dir) for dir in dirname]
             dirname = os.path.join(*dirname)

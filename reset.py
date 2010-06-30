@@ -18,11 +18,14 @@ class Reset:
             self.filesystem.copy([self.sourceDir, image],
                                  [self.destDir, image])
 
-    def empty(self):
-        self.destImages = self.filesystem.listJpegs(self.destDir)
+    def empty(self, path='', removeDir=True):
+        if path == '':
+            path = self.destDir
+        self.destImages = self.filesystem.listJpegs(path)
         for image in self.destImages:
-            self.filesystem.removeFile([self.destDir, image])
-        self.filesystem.removeDir(self.destDir)
+            self.filesystem.removeFile([path, image])
+        if removeDir:
+            self.filesystem.removeDir(path)
         
 
 if __name__ == '__main__':

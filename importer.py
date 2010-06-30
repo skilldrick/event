@@ -7,6 +7,7 @@ from photo import Orientation
 from photo import Photo
 from featurebroker import *
 import os.path
+from reset import Reset
 
 
 class Importer:
@@ -57,6 +58,7 @@ class ImporterTests(unittest.TestCase):
     filesystem = Filesystem()
     source = 'imagesdir'
     destination = ['events', 'rugby', 'boys']
+    reset = Reset()
     
     def setUp(self):
         features.provide('Filesystem', MockFilesystem)
@@ -81,6 +83,15 @@ class ImporterTests(unittest.TestCase):
         testIndex = 2
         self.importer.setImport(testIndex)
         self.assertTrue(self.importer.pictures[testIndex]['import'])
+
+    def testImportSelected(self):
+        self.reset.empty(self.filesystem.joinPath(self.destination),
+                         removeDir=False)
+        for i in range(5,7):
+            self.importer.setImport(i)
+        self.importer.importSelected()
+        self.reset.empty(self.filesystem.joinPath(self.destination),
+                         removeDir=False)
 
 
 def suite():
