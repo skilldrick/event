@@ -280,8 +280,8 @@ class FilesystemTests(unittest.TestCase):
                          'Didn\'t copy over file')
 
     def testCopyOverFileWithFail(self):
-        file1 = [self.imagesDir, 'The Garden 17th June 015.JPG']
-        file2 = [self.imagesDir, 'The Garden 17th June 016.JPG']
+        file1 = [self.imagesDir, 'The Garden 17th June 013.JPG']
+        file2 = [self.imagesDir, 'The Garden 17th June 014.JPG']
         file1Size = self.filesystem.getFileSize(file1)
         file2Size = self.filesystem.getFileSize(file2)
         try:

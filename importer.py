@@ -41,7 +41,7 @@ class Importer:
     def setImport(self, index, doImport=True):
         self.pictures[index]['import'] = doImport
 
-    def importSelected(self):
+    def importSelected(self, remove=True):
         """
         copy all images to destination then delete
         all source images. Confirm?
@@ -52,6 +52,13 @@ class Importer:
                 newPath = [self.destination,
                            self.filesystem.getFilename(path)]
                 self.filesystem.copy(path, newPath)
+        if remove:
+            self.removeImagesFromSource()
+
+    def removeImagesFromSource(self):
+        for pic in self.pictures:
+            path = pic['photo'].path
+            self.filesystem.removeFile(path)
 
 
 class ImporterTests(unittest.TestCase):
@@ -85,13 +92,31 @@ class ImporterTests(unittest.TestCase):
         self.assertTrue(self.importer.pictures[testIndex]['import'])
 
     def testImportSelected(self):
-        self.reset.empty(self.filesystem.joinPath(self.destination),
+        self.reset.empty(self.destination,
                          removeDir=False)
-        for i in range(5,7):
+        for i in range(3,6):
             self.importer.setImport(i)
         self.importer.importSelected()
-        self.reset.empty(self.filesystem.joinPath(self.destination),
+        self.assertEqual(self.countJpegsInDestination(), 3)
+        self.reset.empty(self.destination,
                          removeDir=False)
+        self.assertEqual(self.countJpegsInDestination(), 0)
+
+    def testRemoveImagesFromSource(self):
+        self.assertTrue(self.countJpegsInSource > 0)
+        self.importer.removeImagesFromSource()
+        self.assertTrue(self.countJpegsInSource() == 0)
+        self.reset.fill()
+
+    def countJpegsInDestination(self):
+        return self.countJpegsInDirectory(self.destination)
+
+    def countJpegsInSource(self):
+        return self.countJpegsInDirectory(self.source)
+
+    def countJpegsInDirectory(self, directory):
+        files = self.filesystem.listJpegs(directory)
+        return len(list(files))
 
 
 def suite():

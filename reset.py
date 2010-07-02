@@ -21,6 +21,7 @@ class Reset:
     def empty(self, path='', removeDir=True):
         if path == '':
             path = self.destDir
+        path = self.filesystem.joinPath(path)
         self.destImages = self.filesystem.listJpegs(path)
         for image in self.destImages:
             self.filesystem.removeFile([path, image])
