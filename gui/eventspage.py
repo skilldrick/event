@@ -38,6 +38,7 @@ class EventsPage(Shared):
         self.removeEventButton.clicked.connect(self.removeItem)
         self.continueButton = QtGui.QPushButton('Continue')
         self.continueButton.clicked.connect(self.sendIndexToNextPage)
+        self.view.doubleClicked.connect(self.sendIndexToNextPage)
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(self.eventsCountLabel)
         vbox.addWidget(self.view)
