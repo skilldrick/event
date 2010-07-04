@@ -32,6 +32,8 @@ class Reset:
 if __name__ == '__main__':
     reset = Reset()
     reset.empty()
+    reset.empty(['events', 'rugby', 'girls'], removeDir=False)
+    reset.empty(['events', 'rugby', 'boys'], removeDir=False)
 
 
 

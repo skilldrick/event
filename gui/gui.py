@@ -13,6 +13,7 @@ from featurebroker import *
 from .eventspage import EventsPage
 from .sourcedestpage import SourceDestPage
 from .importpage import ImportPage
+from .progresspage import ProgressPage
 from reset import Reset
 
 
@@ -22,6 +23,7 @@ class Stacked(QtGui.QStackedWidget):
         self.widget1 = EventsPage()
         self.widget2 = SourceDestPage()
         self.widget3 = ImportPage()
+        self.widget4 = ProgressPage()
         
         self.widget1.nextPage.connect(self.nextPage)
         self.widget1.setEvent.connect(self.widget2.setEvent)
@@ -29,9 +31,11 @@ class Stacked(QtGui.QStackedWidget):
         self.widget2.nextPage.connect(self.nextPage)
         self.widget2.setSourceDest.connect(self.widget3.setSourceDest)
         self.widget3.previousPage.connect(self.previousPage)
+        self.widget3.nextPage.connect(self.nextPage)
         self.addWidget(self.widget1)
         self.addWidget(self.widget2)
         self.addWidget(self.widget3)
+        self.addWidget(self.widget4)
 
     def nextPage(self):
         self.setCurrentIndex(self.currentIndex() + 1)

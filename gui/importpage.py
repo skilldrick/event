@@ -11,6 +11,7 @@ class ImportPage(QtGui.QWidget):
     stopLoading = QtCore.pyqtSignal()
     previousPage = QtCore.pyqtSignal()
     importSelected = QtCore.pyqtSignal()
+    nextPage = QtCore.pyqtSignal()
     
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -33,6 +34,7 @@ class ImportPage(QtGui.QWidget):
         backButton.clicked.connect(self.previousPage)
         importButton = QtGui.QPushButton('Import selected images')
         importButton.clicked.connect(self.importSelected)
+        self.importSelected.connect(self.nextPage)
         bottomHbox.addStretch()
         bottomHbox.addWidget(backButton)
         bottomHbox.addWidget(importButton)
