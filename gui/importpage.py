@@ -114,7 +114,6 @@ class PhotoWidget(QtGui.QWidget):
         self.setImport.emit(self.index, state)
 
     def displayPhoto(self, image):
-        orientation = self.photo.getOrientation()
         pixmap = QtGui.QPixmap(image)
         self.label.setPixmap(pixmap)
 
@@ -180,42 +179,30 @@ class ThumbMaker(QtCore.QObject):
     but none of the others, especially those rotated 180 degrees.
     """
 
-    def __init__(self, path, orientation):
+    def __init__(self, photo):
         QtCore.QObject.__init__(self)
-        self.orientation = orientation
-        self.path = path
+        self.photo = photo
+        self.path = photo.getPath()
         self.thumbSize = self.config.getProperty('thumbsize')
 
-    def rotatedCW(self):
-        return self.orientation == Orientation.CW_LANDSCAPE or \
-            self.orientation == Orientation.CW_PORTRAIT
-
-    def rotatedCCW(self):
-        return self.orientation == Orientation.CCW_LANDSCAPE or \
-            self.orientation == Orientation.CCW_PORTRAIT
-
-    def rotated180(self):
-        return self.orientation == Orientation.FLIPPED_LANDSCAPE or \
-            self.orientation == Orientation.FLIPPED_PORTRAIT
-
     def scaleByHeight(self):
-        return self.orientation == Orientation.PORTRAIT or \
-            self.orientation == Orientation.CW_LANDSCAPE or \
-            self.orientation == Orientation.CCW_LANDSCAPE or \
-            self.orientation == Orientation.FLIPPED_PORTRAIT
+        return self.photo.orientation == Orientation.PORTRAIT or \
+            self.photo.orientation == Orientation.CW_LANDSCAPE or \
+            self.photo.orientation == Orientation.CCW_LANDSCAPE or \
+            self.photo.orientation == Orientation.FLIPPED_PORTRAIT
 
     def makeThumb(self):
         assert self.path != '', self.path + ' doesn\'t exist'
         image = QtGui.QImage(self.path)
         assert not image.isNull(), 'Image in ' + self.path + ' is null'
 
-        if self.rotatedCW():
+        if self.photo.rotatedCW():
             transform = QtGui.QTransform().rotate(270)
             image = image.transformed(transform)
-        elif self.rotatedCCW():
+        elif self.photo.rotatedCCW():
             transform = QtGui.QTransform().rotate(90)
             image = image.transformed(transform)
-        elif self.rotated180():
+        elif self.photo.rotated180():
             transform = QtGui.QTransform().rotate(180)
             image = image.transformed(transform)
             
@@ -244,8 +231,7 @@ class ThumbMakerThread(QtCore.QThread):
         for i, photo in enumerate(self.photos):
             if self.stopLoading:
                 break
-            thumbMaker = ThumbMaker(photo.getPath(),
-                                    photo.getOrientation())
+            thumbMaker = ThumbMaker(photo)
             self.madeThumb.emit(thumbMaker.makeThumb(), i)
     
         self.exec_()

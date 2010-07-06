@@ -25,6 +25,7 @@ class Photo:
         else:
             self.path = self.filesystem.joinPath([root, filename])
         self.image = Image.open(self.path)
+        self.orientation = self.calculateOrientation()
 
     def type(self):
         return self.image.format
@@ -36,7 +37,7 @@ class Photo:
         width, height = self.image.size
         return width > height
 
-    def getOrientation(self):
+    def calculateOrientation(self):
         """Set up a table with all orientation options.
         Table is indexed by rotation and shape."""
         orientation = [
@@ -60,6 +61,18 @@ class Photo:
         else:
             return orientation[rotation][1]
 
+    def rotatedCW(self):
+        return self.orientation == Orientation.CW_LANDSCAPE or \
+            self.orientation == Orientation.CW_PORTRAIT
+
+    def rotatedCCW(self):
+        return self.orientation == Orientation.CCW_LANDSCAPE or \
+            self.orientation == Orientation.CCW_PORTRAIT
+
+    def rotated180(self):
+        return self.orientation == Orientation.FLIPPED_LANDSCAPE or \
+            self.orientation == Orientation.FLIPPED_PORTRAIT
+
     def getExif(self):
         info = self.image._getexif()
         ret = {}
@@ -70,6 +83,18 @@ class Photo:
         else:
             ret = None
         return ret
+
+    def rotateImage(self):
+        if self.rotatedCCW():
+            self.image = self.image.rotate(-90)
+        elif self.rotatedCW():
+            self.image = self.image.rotate(90)
+        elif self.rotated180():
+            self.image = self.image.rotate(180)
+
+    def save(self, path):
+        self.rotateImage()
+        self.image.save(path)
 
 
 class PhotoTests(unittest.TestCase):
@@ -90,11 +115,10 @@ class PhotoTests(unittest.TestCase):
             self.assertEqual(self.filetype, photo.type())
 
     def testOrientation(self):
-        self.assertEqual(self.photos[0].getOrientation(), 0)
-        self.assertEqual(self.photos[1].getOrientation(), 1)
-        self.assertEqual(self.photos[2].getOrientation(), 4)
-        self.assertEqual(self.photos[3].getOrientation(), 0)
-
+        self.assertEqual(self.photos[0].orientation, 0)
+        self.assertEqual(self.photos[1].orientation, 1)
+        self.assertEqual(self.photos[2].orientation, 4)
+        self.assertEqual(self.photos[3].orientation, 0)
 
 def suite():
     testSuite = unittest.makeSuite(PhotoTests)

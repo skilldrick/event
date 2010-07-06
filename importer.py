@@ -47,9 +47,10 @@ class Importer:
         for pic in self.pictures:
             if pic['import']:
                 path = pic['photo'].path
-                newPath = [self.destination,
-                           self.filesystem.getFilename(path)]
-                self.filesystem.copy(path, newPath)
+                newPath = [self.destination, self.filesystem.getFilename(path)]
+                newPath = self.filesystem.joinPath(newPath)
+                print 'Importing ' + newPath
+                pic['photo'].save(newPath)
         if remove:
             self.removeImagesFromSource()
 
@@ -92,10 +93,9 @@ class ImporterTests(unittest.TestCase):
     def testImportSelected(self):
         self.reset.empty(self.destination,
                          removeDir=False)
-        for i in range(3,6):
-            self.importer.setImport(i)
+        self.importer.setImport(7)
         self.importer.importSelected()
-        self.assertEqual(self.countJpegsInDestination(), 3)
+        self.assertEqual(self.countJpegsInDestination(), 1)
         self.reset.empty(self.destination,
                          removeDir=False)
         self.assertEqual(self.countJpegsInDestination(), 0)
