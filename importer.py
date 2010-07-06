@@ -42,6 +42,8 @@ class Importer:
         self.pictures[index]['import'] = doImport
 
     def importSelected(self, remove=True):
+        #This needs to rotate the images and resave them
+        #(without exif data)
         for pic in self.pictures:
             if pic['import']:
                 path = pic['photo'].path

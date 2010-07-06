@@ -15,3 +15,8 @@ class ProgressPage(QtGui.QWidget):
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(label)
         self.setLayout(vbox)
+        """
+        Show progress bar of importer. Importer
+        will need to send signals of its progress
+        (index of current image divided by total images)
+        """

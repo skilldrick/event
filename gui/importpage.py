@@ -34,7 +34,8 @@ class ImportPage(QtGui.QWidget):
         backButton.clicked.connect(self.previousPage)
         importButton = QtGui.QPushButton('Import selected images')
         importButton.clicked.connect(self.importSelected)
-        self.importSelected.connect(self.nextPage)
+        importButton.clicked.connect(self.nextPage)
+        importButton.clicked.connect(self.stopLoading)
         bottomHbox.addStretch()
         bottomHbox.addWidget(backButton)
         bottomHbox.addWidget(importButton)
@@ -204,6 +205,7 @@ class ThumbMaker(QtCore.QObject):
             self.orientation == Orientation.FLIPPED_PORTRAIT
 
     def makeThumb(self):
+        assert self.path != '', self.path + ' doesn\'t exist'
         image = QtGui.QImage(self.path)
         assert not image.isNull(), 'Image in ' + self.path + ' is null'
 
