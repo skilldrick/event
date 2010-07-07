@@ -94,6 +94,7 @@ class Photo:
 
     def save(self, path):
         self.rotateImage()
+        path = self.filesystem.joinPath(path)
         self.image.save(path)
 
 

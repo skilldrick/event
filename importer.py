@@ -1,3 +1,4 @@
+from PyQt4 import QtCore
 import unittest
 import sys
 
@@ -15,6 +16,7 @@ class Importer:
 
     def __init__(self):
         self.pictures = []
+        self.threads = []
 
     def setLocations(self, source, destination):
         assert self.checkLocationExists(source), \
@@ -42,15 +44,14 @@ class Importer:
         self.pictures[index]['import'] = doImport
 
     def importSelected(self, remove=True):
-        #This needs to rotate the images and resave them
-        #(without exif data)
         for pic in self.pictures:
             if pic['import']:
                 path = pic['photo'].path
                 newPath = [self.destination, self.filesystem.getFilename(path)]
                 newPath = self.filesystem.joinPath(newPath)
-                print 'Importing ' + newPath
-                pic['photo'].save(newPath)
+                thread = MyThread(pic['photo'], newPath)
+                self.threads.append(thread)
+                thread.start()
         if remove:
             self.removeImagesFromSource()
 
@@ -60,6 +61,23 @@ class Importer:
             self.filesystem.removeFile(path)
 
 
+class MyThread(QtCore.QThread):
+    imported = QtCore.pyqtSignal()
+    
+    def __init__(self, photo, path, parent=None):
+        QtCore.QThread.__init__(self, parent)
+        self.photo = photo
+        self.path = path
+
+    def run(self):
+        print 'Importing ' + self.path
+        self.photo.save(self.path)
+        print 'Imported ' + self.path
+        self.imported.emit()
+        #self.exec_()
+    
+
+            
 class ImporterTests(unittest.TestCase):
     filesystem = Filesystem()
     source = 'imagesdir'
@@ -99,6 +117,12 @@ class ImporterTests(unittest.TestCase):
         self.reset.empty(self.destination,
                          removeDir=False)
         self.assertEqual(self.countJpegsInDestination(), 0)
+
+    def testRemoveImagesFromSource(self):
+        self.assertTrue(self.countJpegsInSource > 0)
+        self.importer.removeImagesFromSource()
+        self.assertTrue(self.countJpegsInSource() == 0)
+        self.reset.fill()
 
     def testRemoveImagesFromSource(self):
         self.assertTrue(self.countJpegsInSource > 0)
