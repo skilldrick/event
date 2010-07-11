@@ -22,6 +22,8 @@ class Reset:
         if path == '':
             path = self.destDir
         path = self.filesystem.joinPath(path)
+        if not self.filesystem.checkDirExists(path):
+            return
         self.destImages = self.filesystem.listJpegs(path)
         for image in self.destImages:
             self.filesystem.removeFile([path, image])
