@@ -1,6 +1,7 @@
 import unittest
 import os.path
 import shutil
+import time
     
 
 class Filesystem:
@@ -112,7 +113,12 @@ class Filesystem:
 
     @join
     def removeFile(self, filename):
-        os.remove(filename)
+        try:
+            os.remove(filename)
+        except OSError:
+            asFile = open(filename)
+            asFile.close()
+            os.remove(filename)
 
     @join
     def getFileSize(self, filename):

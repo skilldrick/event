@@ -21,6 +21,7 @@ class SourceWidget(Shared):
 
     def setupLayout(self):
         self.view = QtGui.QListView()
+        self.view.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.view.setModel(self.model)
         self.addButton = QtGui.QPushButton('Add source')
         self.addButton.clicked.connect(self.getItem)
