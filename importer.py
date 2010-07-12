@@ -1,6 +1,7 @@
 from PyQt4 import QtCore
 import unittest
 import sys
+import time
 
 from mocks import MockFilesystem
 from filesystem import Filesystem
@@ -9,6 +10,7 @@ from photo import Photo
 from featurebroker import *
 import os.path
 from reset import Reset
+
 
 
 class Importer:
@@ -44,36 +46,51 @@ class Importer:
         self.pictures[index]['import'] = doImport
 
     def importSelected(self, remove=True):
-        for pic in self.pictures:
-            if pic['import']:
-                path = pic['photo'].path
-                newPath = [self.destination, self.filesystem.getFilename(path)]
-                newPath = self.filesystem.joinPath(newPath)
-                thread = MyThread(pic['photo'], newPath)
-                self.threads.append(thread)
-                thread.start()
+        thread = ImporterThread(self.pictures, self.destination)
+        thread.start()
+        self.threads.append(thread)
+        thread.progress.connect(self.printProgress)
         if remove:
-            self.removeImagesFromSource()
+            thread.finishedProcessing.connect(self.removeImagesFromSource)
 
+    def printProgress(self, progress):
+        print 'Progress: ' + str(progress)
+            
     def removeImagesFromSource(self):
         for pic in self.pictures:
             path = pic['photo'].path
             self.filesystem.removeFile(path)
 
 
-class MyThread(QtCore.QThread):
-    imported = QtCore.pyqtSignal()
+class ImporterThread(QtCore.QThread):
+    finishedProcessing = QtCore.pyqtSignal()
+    progress = QtCore.pyqtSignal(float)
+    filesystem = RequiredFeature('Filesystem')
     
-    def __init__(self, photo, path, parent=None):
+    def __init__(self, pictures, destination, parent=None):
         QtCore.QThread.__init__(self, parent)
-        self.photo = photo
-        self.path = path
+        self.pictures = pictures
+        self.destination = destination
+        self.importablePics = len([pic for pic in self.pictures
+                                   if pic['import']])
+        self.currentPic = 0
 
     def run(self):
-        print 'Importing ' + self.path
-        self.photo.save(self.path)
-        print 'Imported ' + self.path
-        self.imported.emit()
+        for pic in self.pictures:
+            if pic['import']:
+                path = pic['photo'].path
+                newPath = [self.destination,
+                           self.filesystem.getFilename(path)]
+                newPath = self.filesystem.joinPath(newPath)
+                self.processImage(pic['photo'], newPath)
+        self.finishedProcessing.emit()
+
+    def processImage(self, photo, newPath):
+        #print 'Importing ' + newPath
+        photo.save(newPath)
+        self.currentPic += 1.0
+        self.progress.emit(self.currentPic / self.importablePics)
+        #print 'Imported ' + newPath
         #self.exec_()
     
 
@@ -113,6 +130,9 @@ class ImporterTests(unittest.TestCase):
                          removeDir=False)
         self.importer.setImport(7)
         self.importer.importSelected()
+        time.sleep(0.01) #should be enough of a sleep for importing
+        if not self.countJpegsInDestination():
+            time.sleep(0.1) #try a longer sleep if necessary
         self.assertEqual(self.countJpegsInDestination(), 1)
         self.reset.empty(self.destination,
                          removeDir=False)
