@@ -15,6 +15,7 @@ from reset import Reset
 
 class Importer:
     filesystem = RequiredFeature('Filesystem')
+    progress = QtCore.pyqtSignal(float)
 
     def __init__(self):
         self.pictures = []
@@ -54,7 +55,8 @@ class Importer:
             thread.finishedProcessing.connect(self.removeImagesFromSource)
 
     def printProgress(self, progress):
-        print 'Progress: ' + str(progress)
+        print str(progress * 100) + '%'
+        sys.stdout.flush()
             
     def removeImagesFromSource(self):
         for pic in self.pictures:

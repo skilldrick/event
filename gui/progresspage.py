@@ -11,12 +11,15 @@ class ProgressPage(QtGui.QWidget):
         self.setupLayout()
 
     def setupLayout(self):
-        label = QtGui.QLabel('Loading ...')
+        self.label = QtGui.QLabel('Loading ...')
         vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(label)
+        vbox.addWidget(self.label)
         self.setLayout(vbox)
         """
         Show progress bar of importer. Importer
         will need to send signals of its progress
         (index of current image divided by total images)
         """
+
+    def displayProgress(self, prog):
+        self.label.text('Loading ... ' + str(prog * 100) + '%')

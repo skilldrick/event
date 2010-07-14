@@ -36,6 +36,7 @@ if __name__ == '__main__':
     reset.empty()
     reset.empty(['events', 'rugby', 'girls'], removeDir=False)
     reset.empty(['events', 'rugby', 'boys'], removeDir=False)
+    reset.empty(['events', 'rugby'], removeDir=False)
 
 
 
