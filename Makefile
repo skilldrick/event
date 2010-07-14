@@ -1,8 +1,14 @@
+ifeq ($(TERM),cygwin) #This is only true in cygwin so:
+PYTHON=/cygdrive/c/Python26/python.exe #we're using cygwin
+else
+PYTHON=python #we're using linux
+endif
+
 main:
-	python event.py
+	$(PYTHON) event.py
 test:
-	python testall.py
+	$(PYTHON) testall.py
 guitest:
-	python event.py --test
+	$(PYTHON) event.py --test
 clean:
-	python reset.py
+	$(PYTHON) reset.py

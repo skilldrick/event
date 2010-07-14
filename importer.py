@@ -126,6 +126,7 @@ class ImporterTests(unittest.TestCase):
         self.assertTrue(self.importer.pictures[testIndex]['import'])
 
     def testImportSelected(self):
+        #time.sleep(2) #this removes one of the errors in windows!
         self.reset.empty(self.destination,
                          removeDir=False)
         self.importer.setImport(7)
