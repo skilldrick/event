@@ -122,6 +122,7 @@ class CategoryWidget(Shared):
             
         
 class SourceDestPage(QtGui.QWidget):
+    filesystem = RequiredFeature('Filesystem')
     config = RequiredFeature('Config')
     sourceList = RequiredFeature('SourceList')
     previousPage = QtCore.pyqtSignal()
@@ -157,11 +158,13 @@ class SourceDestPage(QtGui.QWidget):
     def importImages(self):
         source = self.sourceWidget.getSelectedPath()
         destination = self.destinationWidget.getSelectedPath()
-        if source and destination:
+        if source and destination and \
+                self.filesystem.checkDirExists(source) and \
+                self.filesystem.checkDirExists(destination):
             self.setSourceDest.emit(source, destination)
             self.nextPage.emit()
         else:
             title = 'Select source and destination'
-            message = 'Please select a source and destination'
+            message = 'Please select a valid source and destination'
             message += ' for image import.'
             QtGui.QMessageBox.information(self, title, message)
