@@ -3,7 +3,7 @@ import math
 
 from featurebroker import *
 from photo import Orientation
-from importer import Importer
+from importer import ImportList
 
 
 class ImportPage(QtGui.QWidget):
@@ -119,7 +119,7 @@ class PhotoWidget(QtGui.QWidget):
 
 
 def PhotoWidgetListMaker():
-    return PhotoWidgetList(Importer())
+    return PhotoWidgetList(ImportList())
 
 
 class PhotoWidgetList(QtGui.QWidget):
@@ -127,19 +127,19 @@ class PhotoWidgetList(QtGui.QWidget):
     select = QtCore.pyqtSignal(bool)
     importSelected = QtCore.pyqtSignal()
     
-    def __init__(self, importer, parent=None):
+    def __init__(self, importList, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        self.importer = importer
-        self.importSelected.connect(self.importer.importSelected)
+        self.importList = importList
+        self.importSelected.connect(self.importList.importSelected)
         self.photoWidgets = []
         self.vbox = QtGui.QVBoxLayout()
         self.setLayout(self.vbox)
 
     def setSourceDest(self, source, destination):
-        self.importer.setLocations(source, destination)
+        self.importList.setLocations(source, destination)
 
     def display(self):
-        for i, pic in enumerate(self.importer.getPictures()):
+        for i, pic in enumerate(self.importList.getPictures()):
             self.addPhoto(pic['photo'], i)
 
         self.setLayout(self.vbox)
@@ -165,7 +165,7 @@ class PhotoWidgetList(QtGui.QWidget):
 
     def addPhoto(self, photo, index):
         photoWidget = PhotoWidget(photo, index)
-        photoWidget.setImport.connect(self.importer.setImport)
+        photoWidget.setImport.connect(self.importList.setImport)
         self.select.connect(photoWidget.select)
         self.photoWidgets.append(photoWidget)
         self.vbox.addWidget(photoWidget)

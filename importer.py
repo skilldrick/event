@@ -1,3 +1,15 @@
+########################
+#NEXT STEPS:
+########################
+# Split this into two classes:
+#
+# 1. Importlist: a list of images for import
+# 2. Importer: the thing that actually imports
+#    the images.
+#
+# Importlist lives with importpage which passes
+# it on to Importer.
+
 from PyQt4 import QtCore
 import unittest
 import sys
@@ -13,13 +25,12 @@ from reset import Reset
 
 
 
-class Importer:
+class ImportList:
     filesystem = RequiredFeature('Filesystem')
     progress = QtCore.pyqtSignal(float)
 
     def __init__(self):
         self.pictures = []
-        self.threads = []
 
     def setLocations(self, source, destination):
         assert self.checkLocationExists(source), \
@@ -45,6 +56,20 @@ class Importer:
 
     def setImport(self, index, doImport=True):
         self.pictures[index]['import'] = doImport
+
+    def importSelected(self, remove=True):
+        self.importer = Importer(self.pictures, self.destination)
+        self.importer.importSelected(remove)
+        
+
+class Importer(QtCore.QObject):
+    filesystem = RequiredFeature('Filesystem')
+    
+    def __init__(self, pictures, destination):
+        QtCore.QObject.__init__(self)
+        self.threads = []
+        self.pictures = pictures
+        self.destination = destination
 
     def importSelected(self, remove=True):
         thread = ImporterThread(self.pictures, self.destination)
@@ -88,16 +113,12 @@ class ImporterThread(QtCore.QThread):
         self.finishedProcessing.emit()
 
     def processImage(self, photo, newPath):
-        #print 'Importing ' + newPath
         photo.save(newPath)
         self.currentPic += 1.0
         self.progress.emit(self.currentPic / self.importablePics)
-        #print 'Imported ' + newPath
-        #self.exec_()
-    
 
             
-class ImporterTests(unittest.TestCase):
+class ImportListTests(unittest.TestCase):
     filesystem = Filesystem()
     source = 'imagesdir'
     destination = ['events', 'rugby', 'boys']
@@ -107,51 +128,39 @@ class ImporterTests(unittest.TestCase):
         features.provide('Filesystem', MockFilesystem)
         if not self.filesystem.checkDirExists(self.destination):
             self.filesystem.makeDir(self.destination)
-        self.importer = Importer()
-        self.importer.setLocations(self.source, self.destination)
+        self.importList = ImportList()
+        self.importList.setLocations(self.source, self.destination)
 
     def testLocations(self):
-        self.assertEqual(self.source, self.importer.source)
-        self.assertEqual(self.destination, self.importer.destination)
-        self.assertTrue(self.importer.checkLocationExists(self.source))
-        self.assertTrue(self.importer.checkLocationExists(self.destination))
+        self.assertEqual(self.source, self.importList.source)
+        self.assertEqual(self.destination, self.importList.destination)
+        self.assertTrue(self.importList.checkLocationExists(self.source))
+        self.assertTrue(self.importList.checkLocationExists(self.destination))
 
     def testLoadPictures(self):
         numberOfJpegs = len(list(
-                self.importer.filesystem.listJpegs(self.source)))
-        numberOfPictures = len(self.importer.pictures)
+                self.importList.filesystem.listJpegs(self.source)))
+        numberOfPictures = len(self.importList.pictures)
         self.assertEqual(numberOfJpegs, numberOfPictures)
 
     def testSetImportTrue(self):
         testIndex = 2
-        self.importer.setImport(testIndex)
-        self.assertTrue(self.importer.pictures[testIndex]['import'])
+        self.importList.setImport(testIndex)
+        self.assertTrue(self.importList.pictures[testIndex]['import'])
 
-    def testImportSelected(self):
-        #time.sleep(2) #this removes one of the errors in windows!
+    def testImportSelectedAndRemoveImagesFromSource(self):
         self.reset.empty(self.destination,
                          removeDir=False)
-        self.importer.setImport(7)
-        self.importer.importSelected()
+        self.importList.setImport(7)
+        self.importList.importSelected()
         time.sleep(0.01) #should be enough of a sleep for importing
         if not self.countJpegsInDestination():
             time.sleep(0.1) #try a longer sleep if necessary
         self.assertEqual(self.countJpegsInDestination(), 1)
+        #self.assertEqual(self.countJpegsInSource(), 0)
         self.reset.empty(self.destination,
                          removeDir=False)
         self.assertEqual(self.countJpegsInDestination(), 0)
-
-    def testRemoveImagesFromSource(self):
-        self.assertTrue(self.countJpegsInSource > 0)
-        self.importer.removeImagesFromSource()
-        self.assertTrue(self.countJpegsInSource() == 0)
-        self.reset.fill()
-
-    def testRemoveImagesFromSource(self):
-        self.assertTrue(self.countJpegsInSource > 0)
-        self.importer.removeImagesFromSource()
-        self.assertTrue(self.countJpegsInSource() == 0)
-        self.reset.fill()
 
     def countJpegsInDestination(self):
         return self.countJpegsInDirectory(self.destination)
@@ -164,8 +173,17 @@ class ImporterTests(unittest.TestCase):
         return len(list(files))
 
 
+class ImporterTests(unittest.TestCase):
+    
+    def setUp(self):
+        pass
+        
+
+
 def suite():
-    testSuite = unittest.makeSuite(ImporterTests)
+    importListTestSuite = unittest.makeSuite(ImportListTests)
+    importerTestSuite = unittest.makeSuite(ImporterTests)
+    testSuite = unittest.TestSuite((importListTestSuite, importerTestSuite))
     return testSuite
 
         

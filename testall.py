@@ -1,4 +1,5 @@
 import unittest
+import time
 
 import eventlist
 import filesystem
@@ -21,7 +22,7 @@ def main():
     reset.fill() #fill imagesdir with images
     runner.run(allTests)
     reset.empty() #delete images in imagesdir
-
+    
 
 if __name__ == '__main__':
     main()

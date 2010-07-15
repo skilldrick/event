@@ -8,7 +8,7 @@ from config import Config
 from eventlist import EventList, EventError
 from filesystem import Filesystem
 from sourcelist import SourceList
-from importer import Importer
+from importer import ImportList
 from featurebroker import *
 from .eventspage import EventsPage
 from .sourcedestpage import SourceDestPage
@@ -78,7 +78,6 @@ def provideFeatures():
     features.provide('EventList', EventList)
     features.provide('Filesystem', Filesystem)
     features.provide('SourceList', SourceList)
-    features.provide('Importer', Importer)
         
 
 def execute(callback=None):

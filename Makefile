@@ -8,6 +8,7 @@ main:
 	$(PYTHON) event.py
 test:
 	$(PYTHON) testall.py
+	$(PYTHON) reset.py
 guitest:
 	$(PYTHON) event.py --test
 clean:

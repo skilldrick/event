@@ -65,7 +65,10 @@ class Filesystem:
 
     @join
     def removeDir(self, dirname):
-        os.rmdir(dirname)
+        try:
+            os.rmdir(dirname)
+        except OSError:
+            pass
 
     @join
     def listDirs(self, root):
@@ -116,9 +119,7 @@ class Filesystem:
         try:
             os.remove(filename)
         except OSError:
-            asFile = open(filename)
-            asFile.close()
-            os.remove(filename)
+            pass
 
     @join
     def getFileSize(self, filename):
