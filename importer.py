@@ -106,13 +106,32 @@ class ImporterThread(QtCore.QThread):
         for pic in self.pictures:
             if pic['import']:
                 path = pic['photo'].path
-                newPath = [self.destination,
-                           self.filesystem.getFilename(path)]
-                newPath = self.filesystem.joinPath(newPath)
-                self.processImage(pic['photo'], newPath)
+                self.processImage(pic['photo'])
         self.finishedProcessing.emit()
 
-    def processImage(self, photo, newPath):
+    def getFileNumber(self, filename):
+        filename = str(filename)
+        number = filename[-7:-4]
+        return int(number)
+
+    def getLastFileNumber(self):
+        filenames = self.filesystem.listJpegs(self.destination)
+        filenames = list(filenames)
+        if len(filenames) > 0:
+            filenumbers = [self.getFileNumber(filename)
+                           for filename in filenames]
+            return max(filenumbers)
+        else:
+            return 0
+
+    def getNextFilename(self):
+        newNumber = self.getLastFileNumber() + 1
+        #see http://docs.python.org/library/string.html#format-examples
+        return "Photo {0:0>3}.jpg".format(newNumber)
+        
+    def processImage(self, photo):
+        newPath = [self.destination,
+                   self.getNextFilename()]
         photo.save(newPath)
         self.currentPic += 1.0
         self.progress.emit(self.currentPic / self.importablePics)
