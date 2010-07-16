@@ -15,7 +15,7 @@ class DirectoryModel(QtGui.QFileSystemModel):
         self.setFilter(QtCore.QDir.AllDirs |
                        QtCore.QDir.Dirs |
                        QtCore.QDir.NoDotAndDotDot)
-
+                       
     def addItem(self, parent, name):
         success = self.mkdir(parent, name)
         self.modelChanged.emit()

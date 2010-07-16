@@ -124,6 +124,10 @@ class Filesystem:
     @join
     def getFileSize(self, filename):
         return os.path.getsize(filename)
+
+    @join
+    def abs(self, path):
+        return os.path.abspath(path)
         
 
 class FilesystemTests(unittest.TestCase):
