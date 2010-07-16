@@ -11,6 +11,7 @@ class ImportPage(QtGui.QWidget):
     stopLoading = QtCore.pyqtSignal()
     previousPage = QtCore.pyqtSignal()
     importSelected = QtCore.pyqtSignal()
+    #sendImportList = QtCore.pyqtSignal(ImportList)
     nextPage = QtCore.pyqtSignal()
     
     def __init__(self, parent=None):
@@ -36,6 +37,7 @@ class ImportPage(QtGui.QWidget):
         importButton.clicked.connect(self.importSelected)
         importButton.clicked.connect(self.nextPage)
         importButton.clicked.connect(self.stopLoading)
+        #importButton.clicked.connect(self.sendImportListSlot)
         bottomHbox.addStretch()
         bottomHbox.addWidget(backButton)
         bottomHbox.addWidget(importButton)
@@ -72,6 +74,7 @@ class ImportPage(QtGui.QWidget):
         self.photoWidgetList = PhotoWidgetListMaker()
         self.stopLoading.connect(self.photoWidgetList.stopLoading)
         self.importSelected.connect(self.photoWidgetList.importSelected)
+        
         self.selectAllButton.clicked.connect(self.photoWidgetList.selectAll)
         self.selectNoneButton.clicked.connect(self.photoWidgetList.selectNone)
 
@@ -80,42 +83,8 @@ class ImportPage(QtGui.QWidget):
         self.photoWidgetList.setSourceDest(source, destination)
         self.photoWidgetList.display()
 
-
-class PhotoWidget(QtGui.QWidget):
-    config = RequiredFeature('Config')
-    setImport = QtCore.pyqtSignal(int, bool)
-    select = QtCore.pyqtSignal(bool)
-
-    def __init__(self, photo, index, parent=None):
-        QtGui.QWidget.__init__(self, parent)
-        self.photo = photo
-        self.index = index
-        self.thumbSize = self.config.getProperty('thumbsize')
-        self.setupLayout()
-
-    def setupLayout(self):
-        self.label = QtGui.QLabel('Loading ...', self)
-        self.label.setAlignment(QtCore.Qt.AlignCenter)
-        self.label.setFixedSize(self.thumbSize, self.thumbSize)
-        hbox = QtGui.QHBoxLayout()
-        hbox.addWidget(self.label)
-        self.checkbox = QtGui.QCheckBox()
-        self.checkbox.stateChanged.connect(self.stateChanged)
-        self.select.connect(self.checkbox.setChecked)
-
-        hbox.addWidget(self.checkbox)
-        self.setLayout(hbox)
-
-    def stateChanged(self, state):
-        if state == QtCore.Qt.Unchecked:
-            state = False
-        else:
-            state = True
-        self.setImport.emit(self.index, state)
-
-    def displayPhoto(self, image):
-        pixmap = QtGui.QPixmap(image)
-        self.label.setPixmap(pixmap)
+        def sendImportListSlot(self):
+            self.sendImportList.emit(self.photoWidgetList.ImportList)
 
 
 def PhotoWidgetListMaker():
@@ -169,6 +138,43 @@ class PhotoWidgetList(QtGui.QWidget):
         self.select.connect(photoWidget.select)
         self.photoWidgets.append(photoWidget)
         self.vbox.addWidget(photoWidget)
+
+
+class PhotoWidget(QtGui.QWidget):
+    config = RequiredFeature('Config')
+    setImport = QtCore.pyqtSignal(int, bool)
+    select = QtCore.pyqtSignal(bool)
+
+    def __init__(self, photo, index, parent=None):
+        QtGui.QWidget.__init__(self, parent)
+        self.photo = photo
+        self.index = index
+        self.thumbSize = self.config.getProperty('thumbsize')
+        self.setupLayout()
+
+    def setupLayout(self):
+        self.label = QtGui.QLabel('Loading ...', self)
+        self.label.setAlignment(QtCore.Qt.AlignCenter)
+        self.label.setFixedSize(self.thumbSize, self.thumbSize)
+        hbox = QtGui.QHBoxLayout()
+        hbox.addWidget(self.label)
+        self.checkbox = QtGui.QCheckBox()
+        self.checkbox.stateChanged.connect(self.stateChanged)
+        self.select.connect(self.checkbox.setChecked)
+
+        hbox.addWidget(self.checkbox)
+        self.setLayout(hbox)
+
+    def stateChanged(self, state):
+        if state == QtCore.Qt.Unchecked:
+            state = False
+        else:
+            state = True
+        self.setImport.emit(self.index, state)
+
+    def displayPhoto(self, image):
+        pixmap = QtGui.QPixmap(image)
+        self.label.setPixmap(pixmap)
 
 
 class ThumbMaker(QtCore.QObject):

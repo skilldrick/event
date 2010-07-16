@@ -6,6 +6,7 @@ class MockFilesystem (Filesystem):
     
     def listDirs(self, root):
         return ['My event', 'event2', 'another event']
+
 """
     def makeDir(self, dirname):
         if not self.checkValidDir(dirname):

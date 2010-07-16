@@ -24,5 +24,9 @@ class ProgressPage(QtGui.QWidget):
         (index of current image divided by total images)
         """
 
+    def receiveImportList(self, importList):
+        print 'Received!!!'
+        self.importList = importList
+
     def displayProgress(self, prog):
         self.label.text('Loading ... ' + str(prog * 100) + '%')
