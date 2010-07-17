@@ -33,7 +33,7 @@ class ImportPage(QtGui.QWidget):
         backButton.clicked.connect(self.previousPage)
         importButton = QtGui.QPushButton('Import selected images')
         importButton.clicked.connect(self.stopLoading)
-        importButton.clicked.connect(self.showImportProgressBar)
+        importButton.clicked.connect(self.importSelected)
         bottomHbox.addStretch()
         bottomHbox.addWidget(backButton)
         bottomHbox.addWidget(importButton)
@@ -45,27 +45,41 @@ class ImportPage(QtGui.QWidget):
         #Sorry Demeter!
         self.importer = self.photoWidgetList.importList.getImporter()
         self.importer.importSelected(remove=True)
+        self.showImportProgressBar()
 
     def showImportProgressBar(self):
-        self.importSelected()
         self.setDisabled(True)
         #Could be using QProgressDialog but have more control this way.
         self.importProgressWidget = ProgressWidget('Importing', self)
         self.importer.importProgress.connect(
             self.importProgressWidget.setProgress)
         self.importer.finishedImporting.connect(self.finishedImporting)
-        #self.importer.
         self.importProgressWidget.show()
 
+    def removeImages(self):
+        self.showRemoveProgressBar()
+        self.importer.removeImagesFromSource()
+
+    def showRemoveProgressBar(self):
+        self.removeProgressWidget = ProgressWidget(
+            'Deleting images', self)
+        self.importer.removeProgress.connect(
+            self.removeProgressWidget.setProgress)
+        self.importer.removeProgress.connect(self.test)
+        self.removeProgressWidget.show()
+
+    def test(self, prog):
+        print prog
+        
     def finishedImporting(self):
         self.importProgressWidget.close()
         #'Would you like to remove all images from the source directory?'
         remove = True #set this with a qdialog
-        """if remove:
-            self.importer.removeImagesFromSource()
-            self.importer.removeProgress.connect(
-                self.removeProgressWidget.setProgress)
-        """
+        remove = QtGui.QMessageBox.question(
+            self, 'Delete images?', 'Delete images from source directory?',
+            QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+        if remove == QtGui.QMessageBox.Yes:
+            self.removeImages()
         
     def setSourceDest(self, source, destination):
         """
