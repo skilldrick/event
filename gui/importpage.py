@@ -1,5 +1,6 @@
 from PyQt4 import QtCore, QtGui
 import math
+import time
 
 from featurebroker import *
 from photo import Orientation
@@ -10,7 +11,7 @@ class ImportPage(QtGui.QWidget):
     config = RequiredFeature('Config')
     stopLoading = QtCore.pyqtSignal()
     previousPage = QtCore.pyqtSignal()
-    nextPage = QtCore.pyqtSignal()
+    restart = QtCore.pyqtSignal()
     
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -44,8 +45,9 @@ class ImportPage(QtGui.QWidget):
     def importSelected(self):
         #Sorry Demeter!
         self.importer = self.photoWidgetList.importList.getImporter()
-        self.importer.importSelected(remove=True)
+        self.importer.finishedRemoving.connect(self.finishedRemoving)
         self.showImportProgressBar()
+        self.importer.importSelected(remove=True)
 
     def showImportProgressBar(self):
         self.setDisabled(True)
@@ -65,8 +67,16 @@ class ImportPage(QtGui.QWidget):
             'Deleting images', self)
         self.importer.removeProgress.connect(
             self.removeProgressWidget.setProgress)
-        self.importer.removeProgress.connect(self.test)
         self.removeProgressWidget.show()
+
+    def finishedRemoving(self):
+        time.sleep(1)
+        self.removeProgressWidget.close()
+        self.finished()
+
+    def finished(self):
+        self.setDisabled(False)
+        self.restart.emit()
 
     def test(self, prog):
         print prog
@@ -80,6 +90,8 @@ class ImportPage(QtGui.QWidget):
             QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
         if remove == QtGui.QMessageBox.Yes:
             self.removeImages()
+        else:
+            self.finished()
         
     def setSourceDest(self, source, destination):
         """

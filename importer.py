@@ -54,6 +54,7 @@ class Importer(QtCore.QObject):
     importProgress = QtCore.pyqtSignal(int)
     removeProgress = QtCore.pyqtSignal(int)
     finishedImporting = QtCore.pyqtSignal()
+    finishedRemoving = QtCore.pyqtSignal()
     
     def __init__(self, pictures, destination):
         QtCore.QObject.__init__(self)
@@ -76,6 +77,7 @@ class Importer(QtCore.QObject):
             self.currentPic += 1.0
             progress = 100 * (self.currentPic / len(self.pictures))
             self.removeProgress.emit(progress)
+        self.finishedRemoving.emit()
 
 
 class ImporterThread(QtCore.QThread):

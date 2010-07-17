@@ -17,28 +17,39 @@ from reset import Reset
 
 
 class Stacked(QtGui.QStackedWidget):
+    restart = QtCore.pyqtSignal()
+    
     def __init__(self, parent=None):
         QtGui.QStackedWidget.__init__(self, parent)
-        self.widget1 = EventsPage()
-        self.widget2 = SourceDestPage()
-        self.widget3 = ImportPage()
-        
-        self.widget1.nextPage.connect(self.nextPage)
-        self.widget1.setEvent.connect(self.widget2.setEvent)
-        self.widget2.previousPage.connect(self.previousPage)
-        self.widget2.nextPage.connect(self.nextPage)
-        self.widget2.setSourceDest.connect(self.widget3.setSourceDest)
-        self.widget3.previousPage.connect(self.previousPage)
-        self.widget3.nextPage.connect(self.nextPage)
-        self.addWidget(self.widget1)
-        self.addWidget(self.widget2)
-        self.addWidget(self.widget3)
+        self.widgets = []
+        self.setupWidgets()
 
+    def setupWidgets(self):
+        self.widgets.append(EventsPage())
+        self.widgets.append(SourceDestPage())
+        self.widgets.append(ImportPage())
+        
+        self.widgets[0].nextPage.connect(self.nextPage)
+        self.widgets[0].setEvent.connect(self.widgets[1].setEvent)
+        self.widgets[1].previousPage.connect(self.previousPage)
+        self.widgets[1].nextPage.connect(self.nextPage)
+        self.widgets[1].setSourceDest.connect(self.widgets[2].setSourceDest)
+        self.widgets[2].previousPage.connect(self.previousPage)
+        self.widgets[2].restart.connect(self.restart)
+        self.addWidget(self.widgets[0])
+        self.addWidget(self.widgets[1])
+        self.addWidget(self.widgets[2])
+        
     def nextPage(self):
         self.setCurrentIndex(self.currentIndex() + 1)
 
     def previousPage(self):
         self.setCurrentIndex(self.currentIndex() - 1)
+
+    def restart(self):
+        for widget in self.widgets:
+            self.removeWidget(widget)
+        self.setupWidgets()
 
 
 class MasterWidget(QtGui.QWidget):
@@ -46,14 +57,11 @@ class MasterWidget(QtGui.QWidget):
         QtGui.QWidget.__init__(self, parent)
         self.setGeometry(300, 300, 400, 400)
         self.setWindowTitle('My Widget!')
+        self.setupLayout()
+
+    def setupLayout(self):
         vbox = QtGui.QVBoxLayout()
         self.stacked = Stacked(self)
-
-        self.previous = QtGui.QPushButton('Previous')
-        self.previous.clicked.connect(self.stacked.previousPage)
-        self.next = QtGui.QPushButton('Next')
-        self.next.clicked.connect(self.stacked.nextPage)
-
         vbox.addWidget(self.stacked)        
         self.setLayout(vbox)
 
@@ -92,7 +100,7 @@ def execute(callback=None):
 
 def modifyForTesting(widget):
     widget.stacked.setCurrentIndex(2)
-    widget.stacked.widget3.setSourceDest('imagesdir', 'events/rugby/boys')
+    widget.stacked.widgets[2].setSourceDest('imagesdir', 'events/rugby/boys')
     
 
 def test():
