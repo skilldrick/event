@@ -52,29 +52,34 @@ class ImportList(QtCore.QObject):
 class Importer(QtCore.QObject):
     filesystem = RequiredFeature('Filesystem')
     importProgress = QtCore.pyqtSignal(int)
+    removeProgress = QtCore.pyqtSignal(int)
+    finishedImporting = QtCore.pyqtSignal()
     
     def __init__(self, pictures, destination):
         QtCore.QObject.__init__(self)
         self.threads = []
         self.pictures = pictures
         self.destination = destination
+        self.currentPic = 0
 
     def importSelected(self, remove=True):
         thread = ImporterThread(self.pictures, self.destination)
         thread.start()
         self.threads.append(thread)
         thread.importProgress.connect(self.importProgress)
-        if remove:
-            thread.finishedProcessing.connect(self.removeImagesFromSource)
+        thread.finishedImporting.connect(self.finishedImporting)
 
     def removeImagesFromSource(self):
         for pic in self.pictures:
             path = pic['photo'].path
             self.filesystem.removeFile(path)
+            self.currentPic += 1.0
+            progress = 100 * (self.currentPic / len(self.pictures))
+            self.removeProgress.emit(progress)
 
 
 class ImporterThread(QtCore.QThread):
-    finishedProcessing = QtCore.pyqtSignal()
+    finishedImporting = QtCore.pyqtSignal()
     importProgress = QtCore.pyqtSignal(int)
     filesystem = RequiredFeature('Filesystem')
     
@@ -91,7 +96,7 @@ class ImporterThread(QtCore.QThread):
             if pic['import']:
                 path = pic['photo'].path
                 self.processImage(pic['photo'])
-        self.finishedProcessing.emit()
+        self.finishedImporting.emit()
 
     def getFileNumber(self, filename):
         filename = str(filename)

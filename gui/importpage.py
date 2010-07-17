@@ -33,7 +33,7 @@ class ImportPage(QtGui.QWidget):
         backButton.clicked.connect(self.previousPage)
         importButton = QtGui.QPushButton('Import selected images')
         importButton.clicked.connect(self.stopLoading)
-        importButton.clicked.connect(self.showProgressBar)
+        importButton.clicked.connect(self.showImportProgressBar)
         bottomHbox.addStretch()
         bottomHbox.addWidget(backButton)
         bottomHbox.addWidget(importButton)
@@ -46,14 +46,26 @@ class ImportPage(QtGui.QWidget):
         self.importer = self.photoWidgetList.importList.getImporter()
         self.importer.importSelected(remove=True)
 
-    def showProgressBar(self):
+    def showImportProgressBar(self):
         self.importSelected()
         self.setDisabled(True)
         #Could be using QProgressDialog but have more control this way.
-        self.progressWidget = ProgressWidget(self)
+        self.importProgressWidget = ProgressWidget('Importing', self)
         self.importer.importProgress.connect(
-            self.progressWidget.setImportProgress)
-        self.progressWidget.show()
+            self.importProgressWidget.setProgress)
+        self.importer.finishedImporting.connect(self.finishedImporting)
+        #self.importer.
+        self.importProgressWidget.show()
+
+    def finishedImporting(self):
+        self.importProgressWidget.close()
+        #'Would you like to remove all images from the source directory?'
+        remove = True #set this with a qdialog
+        """if remove:
+            self.importer.removeImagesFromSource()
+            self.importer.removeProgress.connect(
+                self.removeProgressWidget.setProgress)
+        """
         
     def setSourceDest(self, source, destination):
         """
@@ -94,15 +106,19 @@ class ImportPage(QtGui.QWidget):
 
 
 class ProgressWidget(QtGui.QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, text, parent=None):
         QtGui.QDialog.__init__(self, parent)
+        self.text = text
+        self.setWindowTitle(text)
         self.setupLayout()
 
     def setupLayout(self):
         self.setWindowModality(True)
         vbox = QtGui.QVBoxLayout()
+        self.label = QtGui.QLabel(self.text)
         self.progressBar = QtGui.QProgressBar()
         self.cancelButton = QtGui.QPushButton('Cancel')
+        vbox.addWidget(self.label)
         vbox.addWidget(self.progressBar)
         hbox = QtGui.QHBoxLayout()
         hbox.addStretch(1)
@@ -110,7 +126,7 @@ class ProgressWidget(QtGui.QDialog):
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
-    def setImportProgress(self, progress):
+    def setProgress(self, progress):
         self.progressBar.setValue(progress)
 
 
