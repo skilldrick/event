@@ -3,6 +3,7 @@ import xml.dom.minidom as MD
 from xml.parsers.expat import ExpatError
 import unittest
 
+from featurebroker import *
 from filesystem import Filesystem
 
 class ConfigFile:
@@ -186,19 +187,14 @@ if __name__ == '__main__':
 
 
 class Config:
+    filesystem = RequiredFeature('Filesystem')
     _eventsDir = 'events'
     
     def __init__(self):
         self.configFile = ConfigFile()
 
     def eventsDir(self):
-        return self._eventsDir
-
-    def setEvent(self, event):
-        self._event = event
-
-    def getEvent(self):
-        return self._event
+        return self.filesystem.abs(self._eventsDir)
 
     def addSource(self, path, name):
         self.configFile.addSource(path, name)

@@ -7,6 +7,7 @@ from .shared import Shared
 
 class EventsPage(Shared):
     config = RequiredFeature('Config')
+    filesystem = RequiredFeature('Filesystem')
     setEvent = QtCore.pyqtSignal(str)
     nextPage = QtCore.pyqtSignal()
     itemStrings = {'singularCaps': 'Event',
@@ -18,7 +19,6 @@ class EventsPage(Shared):
     def __init__(self, parent=None):
         Shared.__init__(self, parent)
         self.timer = QtCore.QTimer(self)
-        self.setEvent.connect(self.config.setEvent)
         self.setupLayout()
         self.updateLabelTimer()
         self.eventErrorDialog = QtGui.QErrorMessage(self)
@@ -55,7 +55,6 @@ class EventsPage(Shared):
         #If it fires too soon, 100ms should be enough:
         self.timer.singleShot(100, self.updateLabel)
 
-
     def updateLabel(self):
         index = self.view.rootIndex()
         count = self.model.rowCount(index)
@@ -63,9 +62,14 @@ class EventsPage(Shared):
             s = 's'
         else:
             s = ''
-        labelText = str(count) + ' event' + s + ' in <em>'
-        labelText += self.config.eventsDir() + '</em>'
+        labelText = "{count} event{s} in \
+            <a href='change'>{eventsDir}</a>".format(
+            count=count, s=s, eventsDir=self.config.eventsDir())
+        self.eventsCountLabel.linkActivated.connect(self.changeEventsDir)
         self.eventsCountLabel.setText(labelText)
+
+    def changeEventsDir(self):
+        pass #todo
 
     def sendIndexToNextPage(self):
         eventName = self.getSelectedName()

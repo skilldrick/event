@@ -5,7 +5,7 @@ import time
     
 
 class Filesystem:
-    forbiddenChars = [':', '*', '?', '"', '<', '>', '|']
+    forbiddenChars = ['*', '?', '"', '<', '>', '|']
 
     def __init__(self):
         pass

@@ -49,6 +49,7 @@ class Stacked(QtGui.QStackedWidget):
     def restart(self):
         for widget in self.widgets:
             self.removeWidget(widget)
+        self.widgets = []
         self.setupWidgets()
 
 
