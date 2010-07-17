@@ -34,8 +34,8 @@ class ImportPage(QtGui.QWidget):
         backButton.clicked.connect(self.previousPage)
         importButton = QtGui.QPushButton('Import selected images')
         importButton.clicked.connect(self.importSelected)
-        importButton.clicked.connect(self.nextPage)
         importButton.clicked.connect(self.stopLoading)
+        importButton.clicked.connect(self.showProgressBar)
         bottomHbox.addStretch()
         bottomHbox.addWidget(backButton)
         bottomHbox.addWidget(importButton)
@@ -43,6 +43,11 @@ class ImportPage(QtGui.QWidget):
         vbox.addLayout(bottomHbox)
         self.setLayout(vbox)
 
+    def showProgressBar(self):
+        self.progressWidget = ProgressWidget(self)
+        self.photoWidgetList.progress.connect(self.progressWidget.setProgress)
+        self.progressWidget.show()
+        
     def setSourceDest(self, source, destination):
         """
         setSourceDest is called by a signal from previous page.
@@ -79,6 +84,22 @@ class ImportPage(QtGui.QWidget):
 
         self.photoWidgetList.setSourceDest(source, destination)
         self.photoWidgetList.display()
+
+
+class ProgressWidget(QtGui.QWidget):
+    def __init__(self, parent=None):
+        QtGui.QWidget.__init__(self, parent)
+        self.setupLayout()
+
+    def setupLayout(self):
+        self.setWindowFlags(QtCore.Qt.Dialog)
+        vbox = QtGui.QVBoxLayout()
+        self.label = QtGui.QLabel('Loading ...')
+        vbox.addWidget(self.label)
+        self.setLayout(vbox)
+
+    def setProgress(self, progress):
+        self.label.setText('Loading: ' + str(progress * 100) + '%')
 
 
 class PhotoWidget(QtGui.QWidget):
@@ -126,10 +147,12 @@ class PhotoWidgetList(QtGui.QWidget):
     stopLoading = QtCore.pyqtSignal()
     select = QtCore.pyqtSignal(bool)
     importSelected = QtCore.pyqtSignal()
+    progress = QtCore.pyqtSignal(float)
     
     def __init__(self, importList, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.importList = importList
+        self.importList.progress.connect(self.progress)
         self.importSelected.connect(self.importList.importSelected)
         self.photoWidgets = []
         self.vbox = QtGui.QVBoxLayout()

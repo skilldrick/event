@@ -25,11 +25,12 @@ from reset import Reset
 
 
 
-class ImportList:
+class ImportList(QtCore.QObject):
     filesystem = RequiredFeature('Filesystem')
     progress = QtCore.pyqtSignal(float)
 
     def __init__(self):
+        QtCore.QObject.__init__(self)
         self.pictures = []
 
     def setLocations(self, source, destination):
@@ -59,11 +60,13 @@ class ImportList:
 
     def importSelected(self, remove=True):
         self.importer = Importer(self.pictures, self.destination)
+        self.importer.progress.connect(self.progress)
         self.importer.importSelected(remove)
         
 
 class Importer(QtCore.QObject):
     filesystem = RequiredFeature('Filesystem')
+    progress = QtCore.pyqtSignal(float)
     
     def __init__(self, pictures, destination):
         QtCore.QObject.__init__(self)
@@ -81,6 +84,7 @@ class Importer(QtCore.QObject):
 
     def printProgress(self, progress):
         print str(progress * 100) + '%'
+        self.progress.emit(progress)
         sys.stdout.flush()
             
     def removeImagesFromSource(self):
