@@ -1,15 +1,3 @@
-########################
-#NEXT STEPS:
-########################
-# Split this into two classes:
-#
-# 1. Importlist: a list of images for import
-# 2. Importer: the thing that actually imports
-#    the images.
-#
-# Importlist lives with importpage which passes
-# it on to Importer.
-
 from PyQt4 import QtCore
 import unittest
 import sys
@@ -27,7 +15,6 @@ from reset import Reset
 
 class ImportList(QtCore.QObject):
     filesystem = RequiredFeature('Filesystem')
-    progress = QtCore.pyqtSignal(int)
 
     def __init__(self):
         QtCore.QObject.__init__(self)
@@ -58,15 +45,13 @@ class ImportList(QtCore.QObject):
     def setImport(self, index, doImport=True):
         self.pictures[index]['import'] = doImport
 
-    def importSelected(self, remove=True):
-        self.importer = Importer(self.pictures, self.destination)
-        self.importer.progress.connect(self.progress)
-        self.importer.importSelected(remove)
-        
+    def getImporter(self):
+        return Importer(self.pictures, self.destination)
+
 
 class Importer(QtCore.QObject):
     filesystem = RequiredFeature('Filesystem')
-    progress = QtCore.pyqtSignal(int)
+    importProgress = QtCore.pyqtSignal(int)
     
     def __init__(self, pictures, destination):
         QtCore.QObject.__init__(self)
@@ -78,7 +63,7 @@ class Importer(QtCore.QObject):
         thread = ImporterThread(self.pictures, self.destination)
         thread.start()
         self.threads.append(thread)
-        thread.progress.connect(self.progress)
+        thread.importProgress.connect(self.importProgress)
         if remove:
             thread.finishedProcessing.connect(self.removeImagesFromSource)
 
@@ -90,7 +75,7 @@ class Importer(QtCore.QObject):
 
 class ImporterThread(QtCore.QThread):
     finishedProcessing = QtCore.pyqtSignal()
-    progress = QtCore.pyqtSignal(int)
+    importProgress = QtCore.pyqtSignal(int)
     filesystem = RequiredFeature('Filesystem')
     
     def __init__(self, pictures, destination, parent=None):
@@ -135,7 +120,7 @@ class ImporterThread(QtCore.QThread):
         self.currentPic += 1.0
         #emit percentage progress:
         progress = 100 * (self.currentPic / self.importablePics)
-        self.progress.emit(int(progress))
+        self.importProgress.emit(int(progress))
 
 
 class ImportListTests(unittest.TestCase):
@@ -168,6 +153,8 @@ class ImportListTests(unittest.TestCase):
         self.importList.setImport(testIndex)
         self.assertTrue(self.importList.pictures[testIndex]['import'])
 
+    """
+    #This is now handled from importpage.
     def testImportSelectedAndRemoveImagesFromSource(self):
         self.reset.empty(self.destination,
                          removeDir=False)
@@ -181,6 +168,7 @@ class ImportListTests(unittest.TestCase):
         self.reset.empty(self.destination,
                          removeDir=False)
         self.assertEqual(self.countJpegsInDestination(), 0)
+    """
 
     def countJpegsInDestination(self):
         return self.countJpegsInDirectory(self.destination)

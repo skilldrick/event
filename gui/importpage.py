@@ -10,8 +10,6 @@ class ImportPage(QtGui.QWidget):
     config = RequiredFeature('Config')
     stopLoading = QtCore.pyqtSignal()
     previousPage = QtCore.pyqtSignal()
-    importSelected = QtCore.pyqtSignal()
-    #sendImportList = QtCore.pyqtSignal(ImportList)
     nextPage = QtCore.pyqtSignal()
     
     def __init__(self, parent=None):
@@ -34,7 +32,6 @@ class ImportPage(QtGui.QWidget):
         backButton = QtGui.QPushButton('Back')
         backButton.clicked.connect(self.previousPage)
         importButton = QtGui.QPushButton('Import selected images')
-        importButton.clicked.connect(self.importSelected)
         importButton.clicked.connect(self.stopLoading)
         importButton.clicked.connect(self.showProgressBar)
         bottomHbox.addStretch()
@@ -44,11 +41,18 @@ class ImportPage(QtGui.QWidget):
         vbox.addLayout(bottomHbox)
         self.setLayout(vbox)
 
+    def importSelected(self):
+        #Sorry Demeter!
+        self.importer = self.photoWidgetList.importList.getImporter()
+        self.importer.importSelected(remove=True)
+
     def showProgressBar(self):
+        self.importSelected()
         self.setDisabled(True)
         #Could be using QProgressDialog but have more control this way.
         self.progressWidget = ProgressWidget(self)
-        self.photoWidgetList.progress.connect(self.progressWidget.setProgress)
+        self.importer.importProgress.connect(
+            self.progressWidget.setImportProgress)
         self.progressWidget.show()
         
     def setSourceDest(self, source, destination):
@@ -79,7 +83,6 @@ class ImportPage(QtGui.QWidget):
 
         self.photoWidgetList = PhotoWidgetListMaker()
         self.stopLoading.connect(self.photoWidgetList.stopLoading)
-        self.importSelected.connect(self.photoWidgetList.importSelected)
         
         self.selectAllButton.clicked.connect(self.photoWidgetList.selectAll)
         self.selectNoneButton.clicked.connect(self.photoWidgetList.selectNone)
@@ -107,7 +110,7 @@ class ProgressWidget(QtGui.QDialog):
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
-    def setProgress(self, progress):
+    def setImportProgress(self, progress):
         self.progressBar.setValue(progress)
 
 
@@ -155,14 +158,10 @@ def PhotoWidgetListMaker():
 class PhotoWidgetList(QtGui.QWidget):
     stopLoading = QtCore.pyqtSignal()
     select = QtCore.pyqtSignal(bool)
-    importSelected = QtCore.pyqtSignal()
-    progress = QtCore.pyqtSignal(int)
     
     def __init__(self, importList, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.importList = importList
-        self.importList.progress.connect(self.progress)
-        self.importSelected.connect(self.importList.importSelected)
         self.photoWidgets = []
         self.vbox = QtGui.QVBoxLayout()
         self.setLayout(self.vbox)
