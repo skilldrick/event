@@ -27,7 +27,7 @@ from reset import Reset
 
 class ImportList(QtCore.QObject):
     filesystem = RequiredFeature('Filesystem')
-    progress = QtCore.pyqtSignal(float)
+    progress = QtCore.pyqtSignal(int)
 
     def __init__(self):
         QtCore.QObject.__init__(self)
@@ -66,7 +66,7 @@ class ImportList(QtCore.QObject):
 
 class Importer(QtCore.QObject):
     filesystem = RequiredFeature('Filesystem')
-    progress = QtCore.pyqtSignal(float)
+    progress = QtCore.pyqtSignal(int)
     
     def __init__(self, pictures, destination):
         QtCore.QObject.__init__(self)
@@ -78,15 +78,10 @@ class Importer(QtCore.QObject):
         thread = ImporterThread(self.pictures, self.destination)
         thread.start()
         self.threads.append(thread)
-        thread.progress.connect(self.printProgress)
+        thread.progress.connect(self.progress)
         if remove:
             thread.finishedProcessing.connect(self.removeImagesFromSource)
 
-    def printProgress(self, progress):
-        print str(progress * 100) + '%'
-        self.progress.emit(progress)
-        sys.stdout.flush()
-            
     def removeImagesFromSource(self):
         for pic in self.pictures:
             path = pic['photo'].path
@@ -95,7 +90,7 @@ class Importer(QtCore.QObject):
 
 class ImporterThread(QtCore.QThread):
     finishedProcessing = QtCore.pyqtSignal()
-    progress = QtCore.pyqtSignal(float)
+    progress = QtCore.pyqtSignal(int)
     filesystem = RequiredFeature('Filesystem')
     
     def __init__(self, pictures, destination, parent=None):
@@ -138,7 +133,9 @@ class ImporterThread(QtCore.QThread):
                    self.getNextFilename()]
         photo.save(newPath)
         self.currentPic += 1.0
-        self.progress.emit(self.currentPic / self.importablePics)
+        #emit percentage progress:
+        progress = 100 * (self.currentPic / self.importablePics)
+        self.progress.emit(int(progress))
 
             
 class ImportListTests(unittest.TestCase):

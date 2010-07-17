@@ -94,12 +94,13 @@ class ProgressWidget(QtGui.QWidget):
     def setupLayout(self):
         self.setWindowFlags(QtCore.Qt.Dialog)
         vbox = QtGui.QVBoxLayout()
-        self.label = QtGui.QLabel('Loading ...')
-        vbox.addWidget(self.label)
+        self.progressBar = QtGui.QProgressBar()
+        
+        vbox.addWidget(self.progressBar)
         self.setLayout(vbox)
 
     def setProgress(self, progress):
-        self.label.setText('Loading: ' + str(progress * 100) + '%')
+        self.progressBar.setValue(progress)
 
 
 class PhotoWidget(QtGui.QWidget):
@@ -147,7 +148,7 @@ class PhotoWidgetList(QtGui.QWidget):
     stopLoading = QtCore.pyqtSignal()
     select = QtCore.pyqtSignal(bool)
     importSelected = QtCore.pyqtSignal()
-    progress = QtCore.pyqtSignal(float)
+    progress = QtCore.pyqtSignal(int)
     
     def __init__(self, importList, parent=None):
         QtGui.QWidget.__init__(self, parent)

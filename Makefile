@@ -1,7 +1,7 @@
 ifeq ($(TERM),cygwin) #This is only true in cygwin so:
-PYTHON=/cygdrive/c/Python26/python.exe #we're using cygwin
+PYTHON=/cygdrive/c/Python26/python.exe#we're using cygwin
 else
-PYTHON=python #we're using linux
+PYTHON=python#we're using linux
 endif
 
 main:
