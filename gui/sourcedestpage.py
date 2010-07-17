@@ -105,9 +105,6 @@ class CategoryWidget(Shared):
                 ])
         self.model.setRootPath(currentEventPath)
         currentPathIndex = self.model.index(currentEventPath)
-        print currentEventPath
-        print self.model.data(currentPathIndex).toString()
-        sys.stdout.flush()
         self.view.setRootIndex(currentPathIndex)
         
     def addItem(self, categoryName):

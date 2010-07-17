@@ -45,6 +45,8 @@ class ImportPage(QtGui.QWidget):
         self.setLayout(vbox)
 
     def showProgressBar(self):
+        self.setDisabled(True)
+        #Could be using QProgressDialog but have more control this way.
         self.progressWidget = ProgressWidget(self)
         self.photoWidgetList.progress.connect(self.progressWidget.setProgress)
         self.progressWidget.show()
@@ -88,17 +90,21 @@ class ImportPage(QtGui.QWidget):
         self.photoWidgetList.display()
 
 
-class ProgressWidget(QtGui.QWidget):
+class ProgressWidget(QtGui.QDialog):
     def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
+        QtGui.QDialog.__init__(self, parent)
         self.setupLayout()
 
     def setupLayout(self):
-        self.setWindowFlags(QtCore.Qt.Dialog)
+        self.setWindowModality(True)
         vbox = QtGui.QVBoxLayout()
         self.progressBar = QtGui.QProgressBar()
-        
+        self.cancelButton = QtGui.QPushButton('Cancel')
         vbox.addWidget(self.progressBar)
+        hbox = QtGui.QHBoxLayout()
+        hbox.addStretch(1)
+        hbox.addWidget(self.cancelButton)
+        vbox.addLayout(hbox)
         self.setLayout(vbox)
 
     def setProgress(self, progress):
