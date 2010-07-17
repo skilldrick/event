@@ -137,7 +137,7 @@ class ImporterThread(QtCore.QThread):
         progress = 100 * (self.currentPic / self.importablePics)
         self.progress.emit(int(progress))
 
-            
+
 class ImportListTests(unittest.TestCase):
     filesystem = Filesystem()
     source = 'imagesdir'
@@ -194,10 +194,8 @@ class ImportListTests(unittest.TestCase):
 
 
 class ImporterTests(unittest.TestCase):
-    
     def setUp(self):
         pass
-        
 
 
 def suite():

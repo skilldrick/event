@@ -1,4 +1,5 @@
 from PyQt4 import QtCore, QtGui
+import sys
 
 from featurebroker import *
 from directorymodel import DirectoryModel
@@ -97,12 +98,16 @@ class CategoryWidget(Shared):
         for col in range(1, 4):
             self.view.hideColumn(col)
         self.view.setHeaderHidden(True)
-        currentEventPath = self.filesystem.joinPath([
+        #Needs to be absolute path for Windows:
+        currentEventPath = self.filesystem.abs([
                 self.config.eventsDir(),
                 eventName,
                 ])
         self.model.setRootPath(currentEventPath)
         currentPathIndex = self.model.index(currentEventPath)
+        print currentEventPath
+        print self.model.data(currentPathIndex).toString()
+        sys.stdout.flush()
         self.view.setRootIndex(currentPathIndex)
         
     def addItem(self, categoryName):
