@@ -45,6 +45,7 @@ class ImportPage(QtGui.QWidget):
     def importSelected(self):
         #Sorry Demeter!
         self.importer = self.photoWidgetList.importList.getImporter()
+        self.importer.finishedImporting.connect(self.finishedImporting)
         self.importer.finishedRemoving.connect(self.finishedRemoving)
         self.showImportProgressBar()
         self.importer.importSelected(remove=True)
@@ -55,7 +56,8 @@ class ImportPage(QtGui.QWidget):
         self.importProgressWidget = ProgressWidget('Importing', self)
         self.importer.importProgress.connect(
             self.importProgressWidget.setProgress)
-        self.importer.finishedImporting.connect(self.finishedImporting)
+        self.importProgressWidget.rejected.connect(
+            self.importer.cancelImport)
         self.importProgressWidget.show()
 
     def removeImages(self):
@@ -67,10 +69,11 @@ class ImportPage(QtGui.QWidget):
             'Deleting images', self)
         self.importer.removeProgress.connect(
             self.removeProgressWidget.setProgress)
+        self.removeProgressWidget.rejected.connect(
+            self.importer.cancelRemove)
         self.removeProgressWidget.show()
 
     def finishedRemoving(self):
-        time.sleep(1)
         self.removeProgressWidget.close()
         self.finished()
 
@@ -82,13 +85,8 @@ class ImportPage(QtGui.QWidget):
         self.setDisabled(False)
         self.restart.emit()
 
-    def test(self, prog):
-        print prog
-        
     def finishedImporting(self):
         self.importProgressWidget.close()
-        #'Would you like to remove all images from the source directory?'
-        remove = True #set this with a qdialog
         title = 'Delete images?'
         message = 'Delete all images from source directory?'
         remove = QtGui.QMessageBox.question(self, title, message,
@@ -149,6 +147,7 @@ class ProgressWidget(QtGui.QDialog):
         self.label = QtGui.QLabel(self.text)
         self.progressBar = QtGui.QProgressBar()
         self.cancelButton = QtGui.QPushButton('Cancel')
+        self.cancelButton.clicked.connect(self.reject)
         vbox.addWidget(self.label)
         vbox.addWidget(self.progressBar)
         hbox = QtGui.QHBoxLayout()

@@ -50,34 +50,65 @@ class ImportList(QtCore.QObject):
 
 
 class Importer(QtCore.QObject):
-    filesystem = RequiredFeature('Filesystem')
     importProgress = QtCore.pyqtSignal(int)
     removeProgress = QtCore.pyqtSignal(int)
     finishedImporting = QtCore.pyqtSignal()
     finishedRemoving = QtCore.pyqtSignal()
+    cancelImport = QtCore.pyqtSignal()
+    cancelRemove = QtCore.pyqtSignal()
     
     def __init__(self, pictures, destination):
         QtCore.QObject.__init__(self)
         self.threads = []
         self.pictures = pictures
         self.destination = destination
-        self.currentPic = 0
 
     def importSelected(self, remove=True):
         thread = ImporterThread(self.pictures, self.destination)
         thread.start()
         self.threads.append(thread)
         thread.importProgress.connect(self.importProgress)
+        self.cancelImport.connect(thread.cancelImport)
         thread.finishedImporting.connect(self.finishedImporting)
 
     def removeImagesFromSource(self):
+        thread = RemoverThread(self.pictures)
+        thread.start()
+        self.threads.append(thread)
+        thread.removeProgress.connect(self.removeProgress)
+        self.cancelRemove.connect(thread.cancelRemove)
+        thread.finishedRemoving.connect(self.finishedRemoving)
+
+
+class RemoverThread(QtCore.QThread):
+    filesystem = RequiredFeature('Filesystem')
+    removeProgress = QtCore.pyqtSignal(int)
+    finishedRemoving = QtCore.pyqtSignal()
+
+    def __init__(self, pictures):
+        QtCore.QThread.__init__(self)
+        self.cancel = False
+        self.currentPic = 0
+        self.pictures = pictures
+
+    def cancelRemove(self):
+        self.cancel = True
+
+    def run(self):
         for pic in self.pictures:
-            path = pic['photo'].path
-            self.filesystem.removeFile(path)
-            self.currentPic += 1.0
-            progress = 100 * (self.currentPic / len(self.pictures))
-            self.removeProgress.emit(progress)
+            if self.cancel:
+                break
+            time.sleep(0.05)
+            self.removeImage(pic)
         self.finishedRemoving.emit()
+
+    def removeImage(self, pic):
+        path = pic['photo'].path
+        self.filesystem.removeFile(path)
+        self.currentPic += 1.0
+        progress = 100 * (self.currentPic / len(self.pictures))
+        self.removeProgress.emit(progress)
+    
 
 
 class ImporterThread(QtCore.QThread):
@@ -92,9 +123,15 @@ class ImporterThread(QtCore.QThread):
         self.importablePics = len([pic for pic in self.pictures
                                    if pic['import']])
         self.currentPic = 0
+        self.cancel = False
+
+    def cancelImport(self):
+        self.cancel = True
 
     def run(self):
         for pic in self.pictures:
+            if self.cancel:
+                break
             if pic['import']:
                 path = pic['photo'].path
                 self.processImage(pic['photo'])
