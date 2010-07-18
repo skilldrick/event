@@ -28,10 +28,9 @@ class EventsPage(Shared):
         self.model = DirectoryModel(self)
         self.model.modelChanged.connect(self.updateLabelTimer)
         self.view.setModel(self.model)
-        self.model.setRootPath(self.config.eventsDir())
-        self.eventsDirIndex = self.model.index(self.config.eventsDir())
-        self.view.setRootIndex(self.eventsDirIndex)
+        self.setRoot()
         self.eventsCountLabel = QtGui.QLabel()
+        self.eventsCountLabel.linkActivated.connect(self.changeEventsDir)
         newEventButton = QtGui.QPushButton('New Event')
         newEventButton.clicked.connect(self.getItem)
         self.removeEventButton = QtGui.QPushButton('Remove Event')
@@ -49,6 +48,13 @@ class EventsPage(Shared):
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
+    def setRoot(self, eventsDir=None):
+        if not eventsDir:
+            eventsDir = self.config.getEventsDir()
+        self.model.setRootPath(eventsDir)
+        self.eventsDirIndex = self.model.index(eventsDir)
+        self.view.setRootIndex(self.eventsDirIndex)
+
     def updateLabelTimer(self):
         #updateLabel() has to happen in a different thread:
         self.timer.singleShot(0, self.updateLabel)
@@ -58,18 +64,21 @@ class EventsPage(Shared):
     def updateLabel(self):
         index = self.view.rootIndex()
         count = self.model.rowCount(index)
-        if count > 1:
+        if count > 1 or count == 0:
             s = 's'
         else:
             s = ''
         labelText = "{count} event{s} in \
             <a href='change'>{eventsDir}</a>".format(
-            count=count, s=s, eventsDir=self.config.eventsDir())
-        self.eventsCountLabel.linkActivated.connect(self.changeEventsDir)
+            count=count, s=s, eventsDir=self.config.getEventsDir())
         self.eventsCountLabel.setText(labelText)
 
     def changeEventsDir(self):
-        pass #todo
+        title = 'Choose new events directory'
+        path = QtGui.QFileDialog.getExistingDirectory(self, title)
+        self.config.setEventsDir(path)
+        self.setRoot(path)
+        self.updateLabel()
 
     def sendIndexToNextPage(self):
         eventName = self.getSelectedName()

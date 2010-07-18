@@ -16,7 +16,7 @@ class EventList:
     config = RequiredFeature('Config')
     
     def __init__(self):
-        self.eventsDir = self.config.eventsDir()
+        self.eventsDir = self.config.getEventsDir()
         self.loadEvents()
 
     def loadEvents(self):

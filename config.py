@@ -13,7 +13,8 @@ class ConfigFile:
         {'name':'Memory card', 'location':'D:/'},
         {'name':'Temp folder', 'location':'C:/Photos'}
         ]
-    initThumbSize = 200
+    initThumbSize = 100
+    initEventsDir = 'events'
 
     def configPath(self):
         return self._configPath
@@ -95,6 +96,7 @@ class ConfigFile:
     def writeDomToFile(self):
         file = open(self.configPath(), 'w')
         root = self.dom.childNodes[0]
+        #root.writexml(file, addindent='  ', newl='\n')
         root.writexml(file)
         file.close()
 
@@ -111,9 +113,11 @@ class ConfigFile:
 
         #This is the thumbnail size used in importpage
         self.addSubElement(root, 'thumbsize', self.initThumbSize)
+        self.addSubElement(root, 'eventsdir', self.initEventsDir)
 
         self.writeDomToFile()
 
+        
 class ConfigFileTests(unittest.TestCase):
     testConfigPath = 'testconfig.xml'
 
@@ -188,13 +192,15 @@ if __name__ == '__main__':
 
 class Config:
     filesystem = RequiredFeature('Filesystem')
-    _eventsDir = 'events'
     
     def __init__(self):
         self.configFile = ConfigFile()
 
-    def eventsDir(self):
-        return self.filesystem.abs(self._eventsDir)
+    def getEventsDir(self):
+        return self.filesystem.abs(self.getProperty('eventsdir'))
+
+    def setEventsDir(self, newEventsDir):
+        self.setProperty('eventsdir', newEventsDir)
 
     def addSource(self, path, name):
         self.configFile.addSource(path, name)

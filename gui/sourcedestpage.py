@@ -100,7 +100,7 @@ class CategoryWidget(Shared):
         self.view.setHeaderHidden(True)
         #Needs to be absolute path for Windows:
         currentEventPath = self.filesystem.abs([
-                self.config.eventsDir(),
+                self.config.getEventsDir(),
                 eventName,
                 ])
         self.model.setRootPath(currentEventPath)
@@ -113,7 +113,7 @@ class CategoryWidget(Shared):
             selectedIndex = self.view.rootIndex()
         success = self.model.addItem(selectedIndex, categoryName)
         if not success:
-            print 'addItem failed'
+            print 'CategoryWidget.addItem failed'
 
     def getSelectedPath(self):
         index = self.getSelectedIndex()

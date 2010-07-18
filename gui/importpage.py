@@ -75,6 +75,9 @@ class ImportPage(QtGui.QWidget):
         self.finished()
 
     def finished(self):
+        title = 'Finished Importing'
+        message = 'Importing complete. Click OK to return to the start page.'
+        QtGui.QMessageBox.information(self, title, message)        
         self.setDisabled(False)
         self.restart.emit()
 
