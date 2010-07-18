@@ -72,6 +72,17 @@ class ImportPage(QtGui.QWidget):
             self.importer.cancelRemove)
         self.removeProgressWidget.show()
 
+    def finishedImporting(self):
+        self.importProgressWidget.close()
+        title = 'Delete images?'
+        message = 'Delete all images from source directory?'
+        remove = QtGui.QMessageBox.question(self, title, message,
+            QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+        if remove == QtGui.QMessageBox.Yes:
+            self.removeImages()
+        else:
+            self.finished()
+        
     def finishedRemoving(self):
         self.removeProgressWidget.close()
         self.finished()
@@ -84,52 +95,39 @@ class ImportPage(QtGui.QWidget):
         self.setDisabled(False)
         self.restart.emit()
 
-    def finishedImporting(self):
-        self.importProgressWidget.close()
-        title = 'Delete images?'
-        message = 'Delete all images from source directory?'
-        remove = QtGui.QMessageBox.question(self, title, message,
-            QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-        if remove == QtGui.QMessageBox.Yes:
-            self.removeImages()
-        else:
-            self.finished()
-        
     def setSourceDest(self, source, destination):
-        """
-        setSourceDest is called by a signal from previous page.
-        Because it does some stuff in a separate thread, if it is
-        called multiple times (e.g. if the user goes back to change
-        source or destination) the threads will carry on happily.
-        Therefore we need to do some tidying up first. stopLoading
-        is connected ultimately to the thumbMakerThread, and will
-        cause the thread to stop making thumbs.
-
-        stopLoading is only connected after it is first emitted,
-        so will stop the thumbMakerThread associated with the
-        previous photoWidgetList. Then photoWidgetList is
-        reconstructed with (new) source and destination.
-        """
         try:
-            #if source is same as last time then don't do anything
-            if self.source == source:
-                return
+            oldSource = self.source
         except AttributeError:
-            pass
+            oldSource = None
+            
         self.source = source
         self.destination = destination
-        self.stopLoading.emit()
-        self.photoWidgetList = None
 
+        #First time:
+        if oldSource == None:
+            self.setupPhotoWidgetList()
+        #Subsequent times, but only if source has changed:
+        elif oldSource != self.source:
+            #Need to stop thumbMakerThread from loading thumbs:
+            self.stopLoading.emit()
+            self.setupPhotoWidgetList()
+        else:
+            #Source hasn't changed so no need to setup photowidgetlist
+            pass
+
+    def setupPhotoWidgetList(self):
         self.photoWidgetList = PhotoWidgetListMaker()
         self.stopLoading.connect(self.photoWidgetList.stopLoading)
         
-        self.selectAllButton.clicked.connect(self.photoWidgetList.selectAll)
-        self.selectNoneButton.clicked.connect(self.photoWidgetList.selectNone)
+        self.selectAllButton.clicked.connect(
+            self.photoWidgetList.selectAll)
+        self.selectNoneButton.clicked.connect(
+            self.photoWidgetList.selectNone)
 
         self.scrollArea.setWidget(self.photoWidgetList)
 
-        self.photoWidgetList.setSourceDest(source, destination)
+        self.photoWidgetList.setSourceDest(self.source, self.destination)
         self.photoWidgetList.display()
 
 
