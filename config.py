@@ -76,11 +76,14 @@ class ConfigFile:
             item = self.dom.getElementsByTagName(name)[0].firstChild
         except IndexError:
             return None
-        text = unicode(item.toxml())
-        if text.isnumeric():
-            return int(text)
-        else:
-            return text
+        try:
+            text = unicode(item.toxml())
+            if text.isnumeric():
+                return int(text)
+            else:
+                return text
+        except AttributeError:
+            return None
 
     def setProperty(self, name, value):
         success = True

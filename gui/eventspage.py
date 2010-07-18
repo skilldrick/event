@@ -30,6 +30,7 @@ class EventsPage(Shared):
         self.view.setModel(self.model)
         self.setRoot()
         self.eventsCountLabel = QtGui.QLabel()
+        self.eventsCountLabel.setToolTip('Click to change directory')
         self.eventsCountLabel.linkActivated.connect(self.changeEventsDir)
         newEventButton = QtGui.QPushButton('New Event')
         newEventButton.clicked.connect(self.getItem)
@@ -76,6 +77,10 @@ class EventsPage(Shared):
     def changeEventsDir(self):
         title = 'Choose new events directory'
         path = QtGui.QFileDialog.getExistingDirectory(self, title)
+        path = str(path)
+        if len(path) == 0: #no directory selected
+            return
+        
         self.config.setEventsDir(path)
         self.setRoot(path)
         self.updateLabel()
@@ -86,7 +91,9 @@ class EventsPage(Shared):
             self.setEvent.emit(eventName)
             self.nextPage.emit()
         else:
-            print 'No event selected'
+            title = 'No event selected'
+            message = 'Please select an event.'
+            QtGui.QMessageBox.warning(self, title, message)
 
     def enableButtons(self):
         self.removeEventButton.setEnabled(True)

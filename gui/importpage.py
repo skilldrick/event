@@ -76,8 +76,9 @@ class ImportPage(QtGui.QWidget):
 
     def finished(self):
         title = 'Finished Importing'
-        message = 'Importing complete. Click OK to return to the start page.'
-        QtGui.QMessageBox.information(self, title, message)        
+        message = 'Importing complete. '
+        message += 'Click OK to return to the start page.'
+        QtGui.QMessageBox.information(self, title, message)
         self.setDisabled(False)
         self.restart.emit()
 
@@ -88,8 +89,9 @@ class ImportPage(QtGui.QWidget):
         self.importProgressWidget.close()
         #'Would you like to remove all images from the source directory?'
         remove = True #set this with a qdialog
-        remove = QtGui.QMessageBox.question(
-            self, 'Delete images?', 'Delete images from source directory?',
+        title = 'Delete images?'
+        message = 'Delete all images from source directory?'
+        remove = QtGui.QMessageBox.question(self, title, message,
             QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
         if remove == QtGui.QMessageBox.Yes:
             self.removeImages()

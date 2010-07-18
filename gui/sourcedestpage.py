@@ -143,7 +143,7 @@ class SourceDestPage(QtGui.QWidget):
         self.setEvent.connect(self.destinationWidget.setEvent)
         self.backButton = QtGui.QPushButton('Back')
         self.backButton.clicked.connect(self.previousPage)
-        self.importButton = QtGui.QPushButton('Import')
+        self.importButton = QtGui.QPushButton('Choose images for import')
         self.importButton.clicked.connect(self.importImages)
 
         grid = QtGui.QGridLayout()
