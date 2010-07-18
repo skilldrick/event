@@ -48,11 +48,10 @@ class ImportPage(QtGui.QWidget):
         self.importer.finishedImporting.connect(self.finishedImporting)
         self.importer.finishedRemoving.connect(self.finishedRemoving)
         self.showImportProgressBar()
-        self.importer.importSelected(remove=True)
+        self.importer.importSelected()
 
     def showImportProgressBar(self):
         self.setDisabled(True)
-        #Could be using QProgressDialog but have more control this way.
         self.importProgressWidget = ProgressWidget('Importing', self)
         self.importer.importProgress.connect(
             self.importProgressWidget.setProgress)
@@ -78,8 +77,8 @@ class ImportPage(QtGui.QWidget):
         self.finished()
 
     def finished(self):
-        title = 'Finished Importing'
-        message = 'Importing complete. '
+        title = 'Finished importing/removing'
+        message = 'Importing/removing complete. '
         message += 'Click OK to return to the start page.'
         QtGui.QMessageBox.information(self, title, message)
         self.setDisabled(False)
@@ -158,43 +157,6 @@ class ProgressWidget(QtGui.QDialog):
 
     def setProgress(self, progress):
         self.progressBar.setValue(progress)
-
-
-class PhotoWidget(QtGui.QWidget):
-    config = RequiredFeature('Config')
-    setImport = QtCore.pyqtSignal(int, bool)
-    select = QtCore.pyqtSignal(bool)
-
-    def __init__(self, photo, index, parent=None):
-        QtGui.QWidget.__init__(self, parent)
-        self.photo = photo
-        self.index = index
-        self.thumbSize = self.config.getProperty('thumbsize')
-        self.setupLayout()
-
-    def setupLayout(self):
-        self.label = QtGui.QLabel('Loading ...', self)
-        self.label.setAlignment(QtCore.Qt.AlignCenter)
-        self.label.setFixedSize(self.thumbSize, self.thumbSize)
-        hbox = QtGui.QHBoxLayout()
-        hbox.addWidget(self.label)
-        self.checkbox = QtGui.QCheckBox()
-        self.checkbox.stateChanged.connect(self.stateChanged)
-        self.select.connect(self.checkbox.setChecked)
-
-        hbox.addWidget(self.checkbox)
-        self.setLayout(hbox)
-
-    def stateChanged(self, state):
-        if state == QtCore.Qt.Unchecked:
-            state = False
-        else:
-            state = True
-        self.setImport.emit(self.index, state)
-
-    def displayPhoto(self, image):
-        pixmap = QtGui.QPixmap(image)
-        self.label.setPixmap(pixmap)
 
 
 def PhotoWidgetListMaker():

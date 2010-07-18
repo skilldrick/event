@@ -63,7 +63,7 @@ class Importer(QtCore.QObject):
         self.pictures = pictures
         self.destination = destination
 
-    def importSelected(self, remove=True):
+    def importSelected(self):
         thread = ImporterThread(self.pictures, self.destination)
         thread.start()
         self.threads.append(thread)
@@ -98,7 +98,9 @@ class RemoverThread(QtCore.QThread):
         for pic in self.pictures:
             if self.cancel:
                 break
-            time.sleep(0.05)
+            #Sleep is for humans, not computers.
+            #(gives opportunity to cancel if removal not instantaneous)
+            time.sleep(0.1)
             self.removeImage(pic)
         self.finishedRemoving.emit()
 
