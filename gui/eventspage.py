@@ -69,8 +69,8 @@ class EventsPage(Shared):
             s = 's'
         else:
             s = ''
-        labelText = "{count} event{s} in \
-            <a href='change'>{eventsDir}</a>".format(
+        labelText = "{count} event{s} in <a href='change'>{eventsDir}</a>"
+        labelText = labelText.format(
             count=count, s=s, eventsDir=self.config.getEventsDir())
         self.eventsCountLabel.setText(labelText)
 

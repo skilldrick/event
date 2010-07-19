@@ -88,8 +88,8 @@ class ImportPage(QtGui.QWidget):
         self.finished()
 
     def finished(self):
-        title = 'Finished importing/removing'
-        message = 'Importing/removing complete. '
+        title = 'Finished importing/deleting'
+        message = 'Importing/deleting complete. '
         message += 'Click OK to return to the start page.'
         QtGui.QMessageBox.information(self, title, message)
         self.setDisabled(False)

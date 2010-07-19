@@ -54,10 +54,12 @@ class Stacked(QtGui.QStackedWidget):
 
 
 class MasterWidget(QtGui.QWidget):
+    programTitle = 'Gold Seal Photography Importer'
+    
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        self.setGeometry(300, 300, 400, 400)
-        self.setWindowTitle('My Widget!')
+        self.setGeometry(300, 200, 400, 500)
+        self.setWindowTitle(self.programTitle)
         self.setupLayout()
 
     def setupLayout(self):

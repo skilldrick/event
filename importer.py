@@ -98,9 +98,6 @@ class RemoverThread(QtCore.QThread):
         for pic in self.pictures:
             if self.cancel:
                 break
-            #Sleep is for humans, not computers.
-            #(gives opportunity to cancel if removal not instantaneous)
-            time.sleep(0.1)
             self.removeImage(pic)
         self.finishedRemoving.emit()
 
