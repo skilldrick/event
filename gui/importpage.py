@@ -33,7 +33,6 @@ class ImportPage(QtGui.QWidget):
         backButton = QtGui.QPushButton('Back')
         backButton.clicked.connect(self.previousPage)
         importButton = QtGui.QPushButton('Import selected images')
-        importButton.clicked.connect(self.stopLoading)
         importButton.clicked.connect(self.importSelected)
         bottomHbox.addStretch()
         bottomHbox.addWidget(backButton)
@@ -60,9 +59,9 @@ class ImportPage(QtGui.QWidget):
             self.importer.cancelImport)
         self.importProgressWidget.show()
 
-    def removeImages(self):
+    def removeImages(self, removeSelected=False):
         self.showRemoveProgressBar()
-        self.importer.removeImagesFromSource()
+        self.importer.removeImagesFromSource(removeSelected)
 
     def showRemoveProgressBar(self):
         self.removeProgressWidget = ProgressWidget(
@@ -76,11 +75,23 @@ class ImportPage(QtGui.QWidget):
     def finishedImporting(self):
         self.importProgressWidget.close()
         title = 'Delete images?'
-        message = 'Delete all images from source directory?'
-        remove = QtGui.QMessageBox.question(self, title, message,
-            QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-        if remove == QtGui.QMessageBox.Yes:
+        message = 'Delete all images from source directory,\n'
+        message += 'only the selected images, or keep all the images?'
+        messageBox = QtGui.QMessageBox(self)
+        messageBox.setWindowTitle(title)
+        messageBox.setText(message)
+        messageBox.setIcon(QtGui.QMessageBox.Question)
+        deleteAll = messageBox.addButton(
+            'Delete All', QtGui.QMessageBox.AcceptRole)
+        deleteSelected = messageBox.addButton(
+            'Delete Selected', QtGui.QMessageBox.AcceptRole)
+        keepAll = messageBox.addButton(
+            'Keep All', QtGui.QMessageBox.RejectRole)
+        messageBox.exec_()
+        if messageBox.clickedButton() == deleteAll:
             self.removeImages()
+        elif messageBox.clickedButton() == deleteSelected:
+            self.removeImages(removeSelected=True)
         else:
             self.finished()
 
@@ -98,7 +109,7 @@ class ImportPage(QtGui.QWidget):
 
     def finished(self):
         title = 'Finished importing/deleting'
-        message = 'Importing/deleting complete. '
+        message = 'Importing/deleting complete.\n'
         message += 'Click OK to return to the start page.'
         QtGui.QMessageBox.information(self, title, message)
         self.setDisabled(False)

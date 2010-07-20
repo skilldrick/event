@@ -73,8 +73,8 @@ class Importer(QtCore.QObject):
         thread.importCancelled.connect(self.importCancelled)
         thread.finishedImporting.connect(self.finishedImporting)
 
-    def removeImagesFromSource(self):
-        thread = RemoverThread(self.pictures)
+    def removeImagesFromSource(self, removeSelected):
+        thread = RemoverThread(self.pictures, removeSelected)
         thread.start()
         self.threads.append(thread)
         thread.removeProgress.connect(self.removeProgress)
@@ -87,11 +87,12 @@ class RemoverThread(QtCore.QThread):
     removeProgress = QtCore.pyqtSignal(int)
     finishedRemoving = QtCore.pyqtSignal()
 
-    def __init__(self, pictures):
+    def __init__(self, pictures, removeSelected):
         QtCore.QThread.__init__(self)
         self.cancel = False
         self.currentPic = 0
         self.pictures = pictures
+        self.removeSelected = removeSelected
 
     def cancelRemove(self):
         self.cancel = True
@@ -100,7 +101,17 @@ class RemoverThread(QtCore.QThread):
         for pic in self.pictures:
             if self.cancel:
                 break
-            self.removeImage(pic)
+            if self.removeSelected:
+                """What's going on here?
+                It says they're marked for import but
+                they're still showing up when the new list of thumbs
+                comes up, after the second import"""
+                print pic['import']
+                sys.stdout.flush()
+                if pic['import']:
+                    self.removeImage(pic)
+            else:
+                self.removeImage(pic)
         self.finishedRemoving.emit()
 
     def removeImage(self, pic):
