@@ -56,7 +56,8 @@ class Importer(QtCore.QObject):
     finishedRemoving = QtCore.pyqtSignal()
     cancelImport = QtCore.pyqtSignal()
     cancelRemove = QtCore.pyqtSignal()
-    
+    importCancelled = QtCore.pyqtSignal()
+
     def __init__(self, pictures, destination):
         QtCore.QObject.__init__(self)
         self.threads = []
@@ -69,6 +70,7 @@ class Importer(QtCore.QObject):
         self.threads.append(thread)
         thread.importProgress.connect(self.importProgress)
         self.cancelImport.connect(thread.cancelImport)
+        thread.importCancelled.connect(self.importCancelled)
         thread.finishedImporting.connect(self.finishedImporting)
 
     def removeImagesFromSource(self):
@@ -107,12 +109,12 @@ class RemoverThread(QtCore.QThread):
         self.currentPic += 1.0
         progress = 100 * (self.currentPic / len(self.pictures))
         self.removeProgress.emit(progress)
-    
 
 
 class ImporterThread(QtCore.QThread):
     finishedImporting = QtCore.pyqtSignal()
     importProgress = QtCore.pyqtSignal(int)
+    importCancelled = QtCore.pyqtSignal()
     filesystem = RequiredFeature('Filesystem')
     
     def __init__(self, pictures, destination, parent=None):
@@ -122,6 +124,7 @@ class ImporterThread(QtCore.QThread):
         self.importablePics = len([pic for pic in self.pictures
                                    if pic['import']])
         self.currentPic = 0
+        self.importedFilenames = []
         self.cancel = False
 
     def cancelImport(self):
@@ -130,11 +133,20 @@ class ImporterThread(QtCore.QThread):
     def run(self):
         for pic in self.pictures:
             if self.cancel:
-                break
+                self.importCancelled.emit()
+                self.rollBack()
+                return #Don't emit finishedImporting
             if pic['import']:
                 path = pic['photo'].path
                 self.processImage(pic['photo'])
         self.finishedImporting.emit()
+
+    def rollBack(self):
+        """All file paths are appended to importedFilenames after they
+        are copied, so deleting all files in importedFilenames rolls
+        back to before this thread was run."""
+        for filename in self.importedFilenames:
+            self.filesystem.removeFile(filename)
 
     def getFileNumber(self, filename):
         filename = str(filename)
@@ -154,12 +166,14 @@ class ImporterThread(QtCore.QThread):
     def getNextFilename(self):
         newNumber = self.getLastFileNumber() + 1
         #see http://docs.python.org/library/string.html#format-examples
+        assert (newNumber < 1000), 'Maximum number of images allowed is 999'
         return "Photo {0:0>3}.jpg".format(newNumber)
         
     def processImage(self, photo):
         newPath = [self.destination,
                    self.getNextFilename()]
         photo.save(newPath)
+        self.importedFilenames.append(newPath)
         self.currentPic += 1.0
         #emit percentage progress:
         progress = 100 * (self.currentPic / self.importablePics)

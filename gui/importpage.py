@@ -47,6 +47,7 @@ class ImportPage(QtGui.QWidget):
         self.importer = self.photoWidgetList.importList.getImporter()
         self.importer.finishedImporting.connect(self.finishedImporting)
         self.importer.finishedRemoving.connect(self.finishedRemoving)
+        self.importer.importCancelled.connect(self.importCancelled)
         self.showImportProgressBar()
         self.importer.importSelected()
 
@@ -82,6 +83,14 @@ class ImportPage(QtGui.QWidget):
             self.removeImages()
         else:
             self.finished()
+
+    def importCancelled(self):
+        self.importProgressWidget.close()
+        title = 'Import cancelled'
+        message = 'You have cancelled importing the selected images.\n'
+        message += 'Any images already imported have been removed.'
+        QtGui.QMessageBox.information(self, title, message)
+        self.setDisabled(False)
         
     def finishedRemoving(self):
         self.removeProgressWidget.close()
