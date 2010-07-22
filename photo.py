@@ -1,5 +1,6 @@
 import unittest
 import os.path
+import gc
 import Image
 from PIL.ExifTags import TAGS
 
@@ -28,8 +29,10 @@ class Photo:
         self.openPhoto()
         self.orientation = self.calculateOrientation()
 
-    def openPhoto(self, slow=True):
+    def openPhoto(self, slow=False):
         if slow:
+            #This is the way to do it to ensure the image is closed.
+            #Deleting image achieves the same effect so not needed.
             imageFile = open(self.path, 'rb')
             self.image = Image.open(imageFile)
             self.image.load()
@@ -106,11 +109,11 @@ class Photo:
         self.rotateImage()
         path = self.filesystem.joinPath(path)
         self.image.save(path)
-        self.close()
 
     def close(self):
-        #This is where we're going to force deletion of the image.
-        print 'Closing this image'
+        #This is needed so Windows won't think the file is still in use.
+        del self.image
+        gc.collect() #Belt and braces (not necessarily necessary).
 
 
 class PhotoTests(unittest.TestCase):
