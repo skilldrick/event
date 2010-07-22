@@ -48,6 +48,11 @@ class ImportList(QtCore.QObject):
     def getImporter(self):
         return Importer(self.pictures, self.destination)
 
+    def close(self):
+        for picture in self.pictures:
+            print 'Closing'
+            picture['photo'].close()
+
 
 class Importer(QtCore.QObject):
     importProgress = QtCore.pyqtSignal(int)
@@ -106,8 +111,9 @@ class RemoverThread(QtCore.QThread):
                 It says they're marked for import but
                 they're still showing up when the new list of thumbs
                 comes up, after the second import"""
-                print pic['import']
-                sys.stdout.flush()
+                """The problem is that the file can't be accessed the
+                second time round because windows thinks it's being
+                used by another process"""
                 if pic['import']:
                     self.removeImage(pic)
             else:
@@ -117,6 +123,7 @@ class RemoverThread(QtCore.QThread):
     def removeImage(self, pic):
         path = pic['photo'].path
         self.filesystem.removeFile(path)
+        sys.stdout.flush()
         self.currentPic += 1.0
         progress = 100 * (self.currentPic / len(self.pictures))
         self.removeProgress.emit(progress)
@@ -220,23 +227,6 @@ class ImportListTests(unittest.TestCase):
         testIndex = 2
         self.importList.setImport(testIndex)
         self.assertTrue(self.importList.pictures[testIndex]['import'])
-
-    """
-    #This is now handled from importpage.
-    def testImportSelectedAndRemoveImagesFromSource(self):
-        self.reset.empty(self.destination,
-                         removeDir=False)
-        self.importList.setImport(7)
-        self.importList.importSelected()
-        time.sleep(0.01) #should be enough of a sleep for importing
-        if not self.countJpegsInDestination():
-            time.sleep(0.1) #try a longer sleep if necessary
-        self.assertEqual(self.countJpegsInDestination(), 1)
-        #self.assertEqual(self.countJpegsInSource(), 0)
-        self.reset.empty(self.destination,
-                         removeDir=False)
-        self.assertEqual(self.countJpegsInDestination(), 0)
-    """
 
     def countJpegsInDestination(self):
         return self.countJpegsInDirectory(self.destination)

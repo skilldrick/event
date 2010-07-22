@@ -47,6 +47,7 @@ class ImportPage(QtGui.QWidget):
         self.importer.finishedImporting.connect(self.finishedImporting)
         self.importer.finishedRemoving.connect(self.finishedRemoving)
         self.importer.importCancelled.connect(self.importCancelled)
+        self.restart.connect(self.photoWidgetList.importList.close)
         self.showImportProgressBar()
         self.importer.importSelected()
 
@@ -239,7 +240,7 @@ class PhotoWidget(QtGui.QWidget):
         self.index = index
         self.thumbSize = self.config.getProperty('thumbsize')
         self.setupLayout()
-
+        
     def setupLayout(self):
         self.label = QtGui.QLabel('Loading ...', self)
         self.label.setAlignment(QtCore.Qt.AlignCenter)

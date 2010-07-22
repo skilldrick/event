@@ -24,8 +24,18 @@ class Photo:
             self.path = root
         else:
             self.path = self.filesystem.joinPath([root, filename])
-        self.image = Image.open(self.path)
+
+        self.openPhoto()
         self.orientation = self.calculateOrientation()
+
+    def openPhoto(self, slow=True):
+        if slow:
+            imageFile = open(self.path, 'rb')
+            self.image = Image.open(imageFile)
+            self.image.load()
+            imageFile.close()
+        else:
+            self.image = Image.open(self.path)
 
     def type(self):
         return self.image.format
@@ -96,6 +106,11 @@ class Photo:
         self.rotateImage()
         path = self.filesystem.joinPath(path)
         self.image.save(path)
+        self.close()
+
+    def close(self):
+        #This is where we're going to force deletion of the image.
+        print 'Closing this image'
 
 
 class PhotoTests(unittest.TestCase):

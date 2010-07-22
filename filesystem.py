@@ -2,6 +2,7 @@ import unittest
 import os.path
 import shutil
 import time
+import sys
     
 
 class Filesystem:
@@ -119,7 +120,8 @@ class Filesystem:
         try:
             os.remove(filename)
         except OSError:
-            pass
+            print 'File remove failed: ' + filename
+            sys.stdout.flush()
 
     @join
     def getFileSize(self, filename):
